@@ -1,0 +1,15 @@
+# Visual Studio
+.vs/
+
+# Build folders
+bin/
+obj/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
