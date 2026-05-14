@@ -7,9 +7,9 @@ namespace bibliotecha.Models
     {
         public int? BrojClanskeKartice { get; set; }
 
-        public string Ime {  get; set; }
+        public string Ime { get; set; } = string.Empty;
 
-        public string Prezime { get; set; }
+        public string Prezime { get; set; } = string.Empty;
 
         public DateOnly? DatumZaposlenja { get; set; }
 
