@@ -8,9 +8,8 @@ namespace bibliotecha.Models
         [Key]
         public int IdObavjestenja {  get; set; }
 
-
         [ForeignKey("Korisnik")]
-        public int KorisnikId { get; set; }
+        public string KorisnikId { get; set; }
         public Korisnik Korisnik { get; set; }
 
         public string Poruka { get; set; }

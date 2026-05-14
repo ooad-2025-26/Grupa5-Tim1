@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace bibliotecha.Data
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext(options)
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<Korisnik>(options)
     {
         public DbSet<Autor> Autor { get; set; }
         public DbSet<Knjiga> Knjiga { get; set; }
@@ -20,7 +20,15 @@ namespace bibliotecha.Data
 
             modelBuilder.Entity<Autor>().ToTable("Autor");
             modelBuilder.Entity<Knjiga>().ToTable("Knjiga");
-            modelBuilder.Entity<Korisnik>().ToTable("Korisnik");
+            modelBuilder.Entity<Korisnik>(b =>
+            {
+                b.Property(k => k.BrojClanskeKartice);
+                b.Property(k => k.Ime);
+                b.Property(k => k.Prezime);
+                b.Property(k => k.DatumZaposlenja);
+                b.Property(k => k.DatumRegistracije);
+                b.Property(k => k.Uloga);
+            });
             modelBuilder.Entity<Obavjestenje>().ToTable("Obavjestenje");
             modelBuilder.Entity<Posudba>().ToTable("Posudba");
             modelBuilder.Entity<Primjerak>().ToTable("Primjerak");
