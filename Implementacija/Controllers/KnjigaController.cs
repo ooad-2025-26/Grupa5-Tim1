@@ -48,7 +48,7 @@ namespace bibliotecha.Controllers
         // GET: Knjiga/Create
         public IActionResult Create()
         {
-            ViewData["AutorId"] = new SelectList(_context.Autor, "IdAutora", "IdAutora");
+            PopuniAutore();
             return View();
         }
 
@@ -59,13 +59,15 @@ namespace bibliotecha.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdKnjige,ISBN,Naslov,AutorId,Zanr,Opis,DatumIzdavanja,Izdavac,BrojStranica,Jezik,KoricaKnjige,ProsjecnaOcjena")] Knjiga knjiga)
         {
+            ModelState.Remove(nameof(Knjiga.Autor));
+
             if (ModelState.IsValid)
             {
                 _context.Add(knjiga);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AutorId"] = new SelectList(_context.Autor, "IdAutora", "IdAutora", knjiga.AutorId);
+            PopuniAutore(knjiga.AutorId);
             return View(knjiga);
         }
 
@@ -82,7 +84,7 @@ namespace bibliotecha.Controllers
             {
                 return NotFound();
             }
-            ViewData["AutorId"] = new SelectList(_context.Autor, "IdAutora", "IdAutora", knjiga.AutorId);
+            PopuniAutore(knjiga.AutorId);
             return View(knjiga);
         }
 
@@ -97,6 +99,8 @@ namespace bibliotecha.Controllers
             {
                 return NotFound();
             }
+
+            ModelState.Remove(nameof(Knjiga.Autor));
 
             if (ModelState.IsValid)
             {
@@ -118,7 +122,7 @@ namespace bibliotecha.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AutorId"] = new SelectList(_context.Autor, "IdAutora", "IdAutora", knjiga.AutorId);
+            PopuniAutore(knjiga.AutorId);
             return View(knjiga);
         }
 
@@ -159,6 +163,19 @@ namespace bibliotecha.Controllers
         private bool KnjigaExists(int id)
         {
             return _context.Knjiga.Any(e => e.IdKnjige == id);
+        }
+
+        private void PopuniAutore(int? odabraniAutorId = null)
+        {
+            var autori = _context.Autor
+                .Select(a => new
+                {
+                    a.IdAutora,
+                    PunoIme = a.Ime + " " + a.Prezime
+                })
+                .ToList();
+
+            ViewData["AutorId"] = new SelectList(autori, "IdAutora", "PunoIme", odabraniAutorId);
         }
     }
 }

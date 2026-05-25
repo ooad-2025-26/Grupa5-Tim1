@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="260" viewBox="0 0 180 260" role="img" aria-labelledby="title">
+  <title id="title">Korica knjige</title>
+  <rect width="180" height="260" fill="#c9635e"/>
+  <rect x="18" y="18" width="144" height="224" fill="#f7eee9" opacity=".92"/>
+  <rect x="34" y="42" width="112" height="8" fill="#c9635e"/>
+  <rect x="34" y="62" width="92" height="6" fill="#c9635e" opacity=".68"/>
+  <circle cx="90" cy="132" r="38" fill="#c9635e" opacity=".22"/>
+  <path d="M62 132c18-20 38-20 56 0-18 20-38 20-56 0Z" fill="#c9635e" opacity=".72"/>
+  <rect x="42" y="204" width="96" height="6" fill="#c9635e" opacity=".62"/>
+  <rect x="56" y="220" width="68" height="5" fill="#c9635e" opacity=".44"/>
+</svg>

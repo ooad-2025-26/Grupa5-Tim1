@@ -1,8 +1,69 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<bibliotecha.Models.KnjigaBlokViewModel>
+
+@{
+    ViewData["Title"] = "bibliotecha";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Dobrodosli u bibliotechu!</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="home-library">
+    @if (Model.Any())
+    {
+        foreach (var sekcija in Model)
+        {
+            <article class="genre-section">
+                <div class="genre-section__header">
+                    <h2>@sekcija.NazivZanra</h2>
+                </div>
+
+                <div class="genre-section__carousel" data-book-carousel>
+                    <button class="genre-section__arrow genre-section__arrow--left"
+                            type="button"
+                            data-carousel-prev
+                            aria-label="Prethodne knjige iz zanra @sekcija.NazivZanra">
+                        &lsaquo;
+                    </button>
+
+                    <div class="genre-section__viewport" aria-label="Knjige iz zanra @sekcija.NazivZanra">
+                        <div class="genre-section__shelf" data-carousel-track>
+                            @foreach (var knjiga in sekcija.Knjige)
+                            {
+                                var korica = string.IsNullOrWhiteSpace(knjiga.KoricaKnjige)
+                                    ? Url.Content("~/images/book-placeholder.svg")
+                                    : knjiga.KoricaKnjige;
+
+                                <div class="book-card">
+                                    <div class="book-card__cover-wrap">
+                                        <img class="book-card__cover"
+                                             src="@korica"
+                                             alt="Korica knjige @knjiga.Naslov" />
+                                    </div>
+                                    <a class="book-card__button"
+                                       asp-controller="Knjiga"
+                                       asp-action="Details"
+                                       asp-route-id="@knjiga.IdKnjige">
+                                        Pregled
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <button class="genre-section__arrow genre-section__arrow--right"
+                            type="button"
+                            data-carousel-next
+                            aria-label="Sljedece knjige iz zanra @sekcija.NazivZanra">
+                        &rsaquo;
+                    </button>
+                </div>
+            </article>
+        }
+    }
+    else
+    {
+        <article class="genre-section genre-section--empty">
+            <div class="genre-section__header">
+                <h2>Knjige</h2>
+            </div>
+            <p class="home-library__empty">Trenutno nema unesenih knjiga za prikaz.</p>
+        </article>
+    }
+</section>

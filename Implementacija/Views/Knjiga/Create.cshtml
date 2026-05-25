@@ -11,7 +11,7 @@
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="ISBN" class="control-label"></label>
                 <input asp-for="ISBN" class="form-control" />
@@ -24,11 +24,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="AutorId" class="control-label"></label>
-                <select asp-for="AutorId" class ="form-control" asp-items="ViewBag.AutorId"></select>
+                <select asp-for="AutorId" class="form-control" asp-items="ViewBag.AutorId"></select>
+                <span asp-validation-for="AutorId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Zanr" class="control-label"></label>
-                <select asp-for="Zanr" class="form-control"></select>
+                <select asp-for="Zanr" class="form-control" asp-items="Html.GetEnumSelectList<Zanr>()"></select>
                 <span asp-validation-for="Zanr" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -53,7 +54,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Jezik" class="control-label"></label>
-                <select asp-for="Jezik" class="form-control"></select>
+                <select asp-for="Jezik" class="form-control" asp-items="Html.GetEnumSelectList<Jezik>()"></select>
                 <span asp-validation-for="Jezik" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -78,5 +79,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
