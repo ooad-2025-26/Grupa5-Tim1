@@ -1,7 +1,13 @@
-﻿namespace bibliotecha.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace bibliotecha.Models
 {
     public enum VrstaObavjestenja
     {
-        isticeRok, knjigaDostupna
+        [Display(Name = "Ističe rok")]
+        isticeRok,
+
+        [Display(Name = "Knjiga dostupna")]
+        knjigaDostupna
     }
 }
