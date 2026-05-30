@@ -262,3 +262,48 @@ body {
         padding: 1.5rem;
     }
 }
+
+.navbar {
+    background-color: #c9635e !important;
+    height: 62px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.navbar-brand {
+    color: #f7eee9 !important;
+    margin-left: 20px;
+    font-size: 1.8rem;
+    line-height: 70px;
+}
+
+    .navbar-brand:hover {
+        color: #ffffff !important;
+    }
+
+.logo-tech {
+    color: #ffcfcf;
+}
+
+.navbar .nav-link {
+    color: #ffffff !important;
+}
+
+    .navbar .nav-link:hover {
+        color: #fce3e3 !important;
+    }
+
+.navbar a[href*="Register"] {
+    background-color: #fff1df;
+    color: #8b3e39 !important;
+    border-radius: 10px;
+    padding: 0.45rem 1.2rem;
+}
+
+.navbar-nav:last-child {
+    margin-right: 25px;
+}
+
+    .navbar-nav:last-child .nav-item {
+        margin-left: 15px;
+    }
