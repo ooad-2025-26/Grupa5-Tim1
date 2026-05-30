@@ -1,84 +1,55 @@
 ﻿@model bibliotecha.Models.Knjiga
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Naslov;
+    var korica = string.IsNullOrWhiteSpace(Model.KoricaKnjige)
+        ? Url.Content("~/images/book-placeholder.svg")
+        : Model.KoricaKnjige;
 }
 
-<h1>Details</h1>
+<section class="book-details">
+    <div class="book-details__left">
+        <img class="book-details__cover" src="@korica" alt="Korica knjige @Model.Naslov" />
 
-<div>
-    <h4>Knjiga</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ISBN)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ISBN)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Naslov)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Naslov)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Autor)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Autor.IdAutora)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Zanr)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Zanr)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Opis)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Opis)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DatumIzdavanja)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DatumIzdavanja)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Izdavac)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Izdavac)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BrojStranica)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BrojStranica)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Jezik)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Jezik)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.KoricaKnjige)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.KoricaKnjige)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProsjecnaOcjena)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProsjecnaOcjena)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdKnjige">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+        <a class="book-details__button"
+           asp-controller="Rezervacijas"
+           asp-action="Create">
+            Rezerviši
+        </a>
+
+        <a class="book-details__button"
+           asp-controller="Posudba"
+           asp-action="Create">
+            Produži posudbu
+        </a>
+    </div>
+
+    <div class="book-details__info">
+        <h1>@Model.Naslov</h1>
+
+        <h2>
+            @Model.Autor?.Ime @Model.Autor?.Prezime
+        </h2>
+
+        <div class="book-details__rating">
+            ★ ★ ★ ★ ☆ <span>@Model.ProsjecnaOcjena</span>
+        </div>
+
+        <p class="book-details__description">
+            @Model.Opis
+        </p>
+
+        <p class="book-details__meta">
+            @Model.Zanr · @Model.Jezik jezik · @Model.BrojStranica stranica
+        </p>
+
+        <p class="book-details__meta">
+            @Model.DatumIzdavanja.ToString("dd. MM. yyyy.") · @Model.Izdavac
+        </p>
+
+        <div class="book-details__links">
+            <a asp-action="Edit" asp-route-id="@Model.IdKnjige">Uredi</a>
+            <a asp-action="Index">Nazad na listu</a>
+        </div>
+    </div>
+</section>
