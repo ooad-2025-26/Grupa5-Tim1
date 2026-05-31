@@ -10,12 +10,17 @@
 <section class="book-details">
     <div class="book-details__left">
         <img class="book-details__cover" src="@korica" alt="Korica knjige @Model.Naslov" />
+        <form asp-controller="Posudba"
+              asp-action="Posudi"
+              method="post">
+            @Html.AntiForgeryToken()
 
-        <a class="book-details__button"
-           asp-controller="Rezervacijas"
-           asp-action="Create">
-            Rezerviši
-        </a>
+            <input type="hidden" name="knjigaId" value="@Model.IdKnjige" />
+
+            <button type="submit" class="book-details__button">
+                Posudi
+            </button>
+        </form>
 
         <a class="book-details__button"
            asp-controller="Posudba"
@@ -53,3 +58,38 @@
         </div>
     </div>
 </section>
+
+@if (TempData["Poruka"] != null)
+{
+    <div class="custom-popup">
+        <div class="custom-popup__box">
+            <p>@TempData["Poruka"]</p>
+            <button type="button" onclick="this.closest('.custom-popup').remove()">
+                U redu
+            </button>
+        </div>
+    </div>
+}
+
+@if (TempData["NemaDostupnihPrimjeraka"] != null)
+{
+    <div class="custom-popup">
+        <div class="custom-popup__box">
+            <p>Knjiga nije dostupna za posudbu. Želite li izvršiti rezervaciju?</p>
+
+            <div class="custom-popup__actions">
+                <form asp-controller="Rezervacijas"
+                      asp-action="Rezervisi"
+                      method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="knjigaId" value="@Model.IdKnjige" />
+                    <button type="submit">Da</button>
+                </form>
+
+                <button type="button" onclick="this.closest('.custom-popup').remove()">
+                    Ne
+                </button>
+            </div>
+        </div>
+    </div>
+}

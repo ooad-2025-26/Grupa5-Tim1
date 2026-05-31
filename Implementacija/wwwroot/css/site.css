@@ -307,3 +307,43 @@ body {
     .navbar-nav:last-child .nav-item {
         margin-left: 15px;
     }
+
+.custom-popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.custom-popup__box {
+    background: #f9eee9;
+    color: #c9635e;
+    border: 1px solid #dfcfc8;
+    box-shadow: 0 4px 12px rgba(85, 55, 50, 0.25);
+    padding: 2rem;
+    width: 360px;
+    text-align: center;
+    border-radius: 6px;
+}
+
+    .custom-popup__box p {
+        font-size: 1.15rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .custom-popup__box button {
+        background: #c9635e;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 0.55rem 1.4rem;
+    }
+
+.custom-popup__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
