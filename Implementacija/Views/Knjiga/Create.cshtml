@@ -64,7 +64,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="ProsjecnaOcjena" class="control-label"></label>
-                <input asp-for="ProsjecnaOcjena" class="form-control" />
+                <input asp-for="ProsjecnaOcjena"
+                       class="form-control"
+                       type="number"
+                       step="0.01"
+                       min="0"
+                       max="5" />
                 <span asp-validation-for="ProsjecnaOcjena" class="text-danger"></span>
             </div>
             <div class="form-group">
