@@ -1,0 +1,100 @@
+﻿@model bibliotecha.Models.TraziViewModel
+
+@{
+    ViewData["Title"] = "Pretraga";
+}
+
+<section class="search-section">
+    <form asp-controller="Home" asp-action="Trazi" method="get" class="search-form">
+        <div class="search-form__main">
+            <input type="text"
+                   name="q"
+                   class="search-form__input"
+                   placeholder="Pretraži knjige, autore..."
+                   value="@Model.Upit"
+                   autocomplete="off" />
+            <button type="submit" class="search-form__button">Pretraži</button>
+        </div>
+        <div class="search-form__filters">
+            <select name="zanr" class="search-form__select">
+                <option value="">Svi žanrovi</option>
+                @foreach (var z in Enum.GetValues<bibliotecha.Models.Zanr>())
+                {
+                    <option value="@((int)z)" selected="@(Model.Zanr == z)">@z</option>
+                }
+            </select>
+            <select name="jezik" class="search-form__select">
+                <option value="">Svi jezici</option>
+                @foreach (var j in Enum.GetValues<bibliotecha.Models.Jezik>())
+                {
+                    <option value="@((int)j)" selected="@(Model.Jezik == j)">@j</option>
+                }
+            </select>
+            <input type="number"
+                   name="godinaOd"
+                   class="search-form__input search-form__input--year"
+                   placeholder="Godina od"
+                   value="@Model.GodinaOd"
+                   min="1000" max="2100" />
+            <input type="number"
+                   name="godinaDo"
+                   class="search-form__input search-form__input--year"
+                   placeholder="Godina do"
+                   value="@Model.GodinaDo"
+                   min="1000" max="2100" />
+            <select name="sortiranje" class="search-form__select search-form__select--sort">
+                <option value="0" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.Ocjena)">Ocjena (najviša)</option>
+                <option value="1" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.Naslov)">Naslov (A → Z)</option>
+                <option value="2" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.NajnovijeIzdanje)">Najnovije izdanje</option>
+                <option value="3" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.NajstarijeIzdanje)">Najstarije izdanje</option>
+                <option value="4" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.Autor)">Autor (A → Z)</option>
+            </select>
+        </div>
+    </form>
+</section>
+
+<section class="search-results">
+    <div class="search-results__header">
+        <h2>
+            @if (!string.IsNullOrWhiteSpace(Model.Upit))
+            {
+                <span>Rezultati za „@Model.Upit"</span>
+            }
+            else
+            {
+                <span>Sve knjige</span>
+            }
+            <span class="search-results__count">(@Model.Rezultati.Count)</span>
+        </h2>
+    </div>
+
+    @if (Model.Rezultati.Any())
+    {
+        <div class="genre-section__shelf" style="flex-wrap: wrap; gap: 1.5rem; padding: 0.25rem;">
+            @foreach (var knjiga in Model.Rezultati)
+            {
+                var korica = string.IsNullOrWhiteSpace(knjiga.KoricaKnjige)
+                    ? Url.Content("~/images/book-placeholder.svg")
+                    : knjiga.KoricaKnjige;
+
+                <div class="book-card">
+                    <div class="book-card__cover-wrap">
+                        <img class="book-card__cover"
+                             src="@korica"
+                             alt="Korica knjige @knjiga.Naslov" />
+                    </div>
+                    <a class="book-card__button"
+                       asp-controller="Knjiga"
+                       asp-action="Details"
+                       asp-route-id="@knjiga.IdKnjige">
+                        Pregled
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="search-results__empty">Nema knjiga koje odgovaraju zadanim kriterijima.</p>
+    }
+</section>

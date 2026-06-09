@@ -26,7 +26,7 @@ namespace bibliotecha.Controllers
             var sekcije = knjige
                 .GroupBy(knjiga => knjiga.Zanr)
                 .OrderBy(grupa => grupa.Key)
-                .Select(grupa => new KnjigaBlokViewModel
+                .Select(grupa => new HomeBookSectionViewModel
                 {
                     Zanr = grupa.Key,
                     NazivZanra = FormatirajNazivZanra(grupa.Key),
@@ -35,6 +35,55 @@ namespace bibliotecha.Controllers
                 .ToList();
 
             return View(sekcije);
+        }
+
+        public async Task<IActionResult> Trazi(string? q, Zanr? zanr, Jezik? jezik, int? godinaOd, int? godinaDo, SortiranjePo sortiranje = SortiranjePo.Ocjena)
+        {
+            var query = _context.Knjiga
+                .Include(k => k.Autor)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+                query = query.Where(k =>
+                    k.Naslov.Contains(q) ||
+                    k.Autor.Ime.Contains(q) ||
+                    k.Autor.Prezime.Contains(q));
+
+            if (zanr.HasValue)
+                query = query.Where(k => k.Zanr == zanr.Value);
+
+            if (jezik.HasValue)
+                query = query.Where(k => k.Jezik == jezik.Value);
+
+            if (godinaOd.HasValue)
+                query = query.Where(k => k.DatumIzdavanja.Year >= godinaOd.Value);
+
+            if (godinaDo.HasValue)
+                query = query.Where(k => k.DatumIzdavanja.Year <= godinaDo.Value);
+
+            query = sortiranje switch
+            {
+                SortiranjePo.Naslov => query.OrderBy(k => k.Naslov),
+                SortiranjePo.NajnovijeIzdanje => query.OrderByDescending(k => k.DatumIzdavanja),
+                SortiranjePo.NajstarijeIzdanje => query.OrderBy(k => k.DatumIzdavanja),
+                SortiranjePo.Autor => query.OrderBy(k => k.Autor.Prezime).ThenBy(k => k.Autor.Ime),
+                _ => query.OrderByDescending(k => k.ProsjecnaOcjena).ThenBy(k => k.Naslov)
+            };
+
+            var rezultati = await query.ToListAsync();
+
+            var vm = new TraziViewModel
+            {
+                Upit = q,
+                Zanr = zanr,
+                Jezik = jezik,
+                GodinaOd = godinaOd,
+                GodinaDo = godinaDo,
+                Sortiranje = sortiranje,
+                Rezultati = rezultati
+            };
+
+            return View(vm);
         }
 
         public IActionResult Privacy()

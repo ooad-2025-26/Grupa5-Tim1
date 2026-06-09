@@ -1,6 +1,6 @@
-﻿namespace bibliotecha.Models
+namespace bibliotecha.Models
 {
-    public class KnjigaBlokViewModel
+    public class HomeBookSectionViewModel
     {
         public Zanr Zanr { get; set; }
         public string NazivZanra { get; set; } = string.Empty;

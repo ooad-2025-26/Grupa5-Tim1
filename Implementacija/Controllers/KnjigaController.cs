@@ -167,15 +167,7 @@ namespace bibliotecha.Controllers
 
         private void PopuniAutore(int? odabraniAutorId = null)
         {
-            var autori = _context.Autor
-                .Select(a => new
-                {
-                    a.IdAutora,
-                    PunoIme = a.Ime + " " + a.Prezime
-                })
-                .ToList();
-
-            ViewData["AutorId"] = new SelectList(autori, "IdAutora", "PunoIme", odabraniAutorId);
+            ViewData["AutorId"] = new SelectList(_context.Autor, "IdAutora", "IdAutora", odabraniAutorId);
         }
     }
 }

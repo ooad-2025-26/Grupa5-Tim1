@@ -7,21 +7,16 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using bibliotecha.Data;
 using bibliotecha.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 
 namespace bibliotecha.Controllers
 {
     public class PosudbaController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<Korisnik> _userManager;
 
-        public PosudbaController(ApplicationDbContext context,
-                                 UserManager<Korisnik> userManager)
+        public PosudbaController(ApplicationDbContext context)
         {
             _context = context;
-            _userManager = userManager;
         }
 
         // GET: Posudba
@@ -165,53 +160,6 @@ namespace bibliotecha.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-
-        [HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Posudi(int knjigaId)
-        {
-            var korisnik = await _userManager.GetUserAsync(User);
-
-            if (korisnik == null)
-            {
-                return Challenge();
-            }
-
-            var dostupanPrimjerak = await _context.Primjerak
-                .FirstOrDefaultAsync(p =>
-                    p.KnjigaId == knjigaId &&
-                    p.Status == StatusPrimjerka.Dostupan);
-
-            if (dostupanPrimjerak == null)
-            {
-                TempData["NemaDostupnihPrimjeraka"] = true;
-                return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
-            }
-
-            var danas = DateOnly.FromDateTime(DateTime.Now);
-
-            var posudba = new Posudba
-            {
-                PrimjerakId = dostupanPrimjerak.IdPrimjerka,
-                KorisnikId = korisnik.Id,
-                DatumOnlinePosudbe = danas,
-                DatumPreuzimanja = null,
-                RokVracanja = danas.AddDays(14),
-                Status = StatusPosudbe.Online,
-                BrojProduzenja = 0
-            };
-
-            dostupanPrimjerak.Status = StatusPrimjerka.Posudjen;
-
-            _context.Posudba.Add(posudba);
-            await _context.SaveChangesAsync();
-
-            TempData["Poruka"] = "Posudba je evidentirana.";
-
-            return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
         }
 
         private bool PosudbaExists(int id)

@@ -59,9 +59,6 @@ namespace bibliotecha.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdPrimjerka,Status,KnjigaId")] Primjerak primjerak)
         {
-            //privremeno ova jedna linija
-            ModelState.Remove(nameof(Primjerak.Knjiga));
-
             if (ModelState.IsValid)
             {
                 _context.Add(primjerak);

@@ -1,8 +1,54 @@
-﻿@model IEnumerable<bibliotecha.Models.KnjigaBlokViewModel>
+@model IEnumerable<bibliotecha.Models.HomeBookSectionViewModel>
 
 @{
     ViewData["Title"] = "bibliotecha";
 }
+
+<section class="search-section">
+    <form asp-controller="Home" asp-action="Trazi" method="get" class="search-form">
+        <div class="search-form__main">
+            <input type="text"
+                   name="q"
+                   class="search-form__input"
+                   placeholder="Pretraži knjige, autore..."
+                   autocomplete="off" />
+            <button type="submit" class="search-form__button">Pretraži</button>
+        </div>
+        <div class="search-form__filters">
+            <select name="zanr" class="search-form__select">
+                <option value="">Svi žanrovi</option>
+                @foreach (var z in Enum.GetValues<bibliotecha.Models.Zanr>())
+                {
+                    <option value="@((int)z)">@z</option>
+                }
+            </select>
+            <select name="jezik" class="search-form__select">
+                <option value="">Svi jezici</option>
+                @foreach (var j in Enum.GetValues<bibliotecha.Models.Jezik>())
+                {
+                    <option value="@((int)j)">@j</option>
+                }
+            </select>
+            <input type="number"
+                   name="godinaOd"
+                   class="search-form__input search-form__input--year"
+                   placeholder="Godina od"
+                   min="1000" max="2100" />
+            <input type="number"
+                   name="godinaDo"
+                   class="search-form__input search-form__input--year"
+                   placeholder="Godina do"
+                   min="1000" max="2100" />
+            <select name="sortiranje" class="search-form__select search-form__select--sort">
+                <option value="0">Ocjena (najviša)</option>
+                <option value="1">Naslov (A → Z)</option>
+                <option value="2">Najnovije izdanje</option>
+                <option value="3">Najstarije izdanje</option>
+                <option value="4">Autor (A → Z)</option>
+            </select>
+        </div>
+    </form>
+</section>
 
 <section class="home-library">
     @if (Model.Any())
@@ -13,7 +59,6 @@
                 <div class="genre-section__header">
                     <h2>@sekcija.NazivZanra</h2>
                 </div>
-
                 <div class="genre-section__carousel" data-book-carousel>
                     <button class="genre-section__arrow genre-section__arrow--left"
                             type="button"
@@ -21,7 +66,6 @@
                             aria-label="Prethodne knjige iz zanra @sekcija.NazivZanra">
                         &lsaquo;
                     </button>
-
                     <div class="genre-section__viewport" aria-label="Knjige iz zanra @sekcija.NazivZanra">
                         <div class="genre-section__shelf" data-carousel-track>
                             @foreach (var knjiga in sekcija.Knjige)
@@ -46,7 +90,6 @@
                             }
                         </div>
                     </div>
-
                     <button class="genre-section__arrow genre-section__arrow--right"
                             type="button"
                             data-carousel-next
