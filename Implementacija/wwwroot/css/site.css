@@ -610,12 +610,23 @@ body {
     margin: 1rem 0;
 }
 
-    .book-details__rating span {
+.book-details__rating {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 2rem;
+    margin: 1rem 0;
+}
+
+    .book-details__rating .rating-value {
         font-size: 1.2rem;
         font-weight: 700;
-        margin-left: 1rem;
+        margin-left: 0.5rem;
     }
 
+    .book-details__rating .rating-stars {
+        line-height: 1;
+    }
 .book-details__description {
     font-size: 1.1rem;
     line-height: 1.55;
