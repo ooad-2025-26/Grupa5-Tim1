@@ -71,6 +71,17 @@ namespace bibliotecha.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
+            [Required]
+            [Display(Name = "Ime")]
+            public string Ime { get; set; }
+
+            [Required]
+            [Display(Name = "Prezime")]
+            public string Prezime { get; set; }
+
+            [Required]
+            [Display(Name = "Broj članske kartice")]
+            public string BrojClanskeKartice { get; set; }
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -115,8 +126,14 @@ namespace bibliotecha.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
+                user.Ime = Input.Ime;
+                user.Prezime = Input.Prezime;
+                user.BrojClanskeKartice = Input.BrojClanskeKartice;
+                user.DatumRegistracije = DateOnly.FromDateTime(DateTime.Now);
+
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)

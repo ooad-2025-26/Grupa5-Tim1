@@ -5,7 +5,7 @@ namespace bibliotecha.Models
 {
     public class Korisnik: IdentityUser
     {
-        public int? BrojClanskeKartice { get; set; }
+        public string BrojClanskeKartice { get; set; }
 
         public string Ime { get; set; } = string.Empty;
 

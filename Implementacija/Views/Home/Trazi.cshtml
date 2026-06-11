@@ -56,15 +56,11 @@
 <section class="search-results">
     <div class="search-results__header">
         <h2>
-            @if (!string.IsNullOrWhiteSpace(Model.Upit))
-            {
-                <span>Rezultati za „@Model.Upit"</span>
-            }
-            else
-            {
-                <span>Sve knjige</span>
-            }
-            <span class="search-results__count">(@Model.Rezultati.Count)</span>
+            <span>
+                @(Model.Rezultati.Count == 1
+                    ? "1 rezultat"
+                    : $"{Model.Rezultati.Count} rezultata")
+            </span>
         </h2>
     </div>
 
@@ -86,14 +82,42 @@
 
                     <div class="search-book-item__info">
 
-                        <h3>@knjiga.Naslov</h3>
+                        <h3 class="search-book-item__title">
+                            @knjiga.Naslov
+                        </h3>
 
                         <p class="search-book-item__author">
                             od @knjiga.Autor.Ime @knjiga.Autor.Prezime
                         </p>
 
                         <div class="search-book-item__rating">
-                            ⭐ @knjiga.ProsjecnaOcjena.ToString("0.00")
+
+                            <span class="rating-stars">
+                                @{
+                                    int brojZvjezdica =
+                                        (int)Math.Round(knjiga.ProsjecnaOcjena,
+                                                        MidpointRounding.AwayFromZero);
+                                }
+
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= brojZvjezdica)
+                                    {
+                                        <span>★</span>
+                                    }
+                                    else
+                                    {
+                                        <span>☆</span>
+                                    }
+                                }
+                            </span>
+
+                            <span class="rating-value">
+                                @knjiga.ProsjecnaOcjena.ToString(
+                                    "0.00",
+                                    System.Globalization.CultureInfo.InvariantCulture)
+                            </span>
+
                         </div>
 
                         <p class="search-book-item__genre">
@@ -107,14 +131,14 @@
                         <a asp-controller="Knjiga"
                            asp-action="Details"
                            asp-route-id="@knjiga.IdKnjige"
-                           class="btn-search-book">
+                           class="search-book-button">
                             Pregled
                         </a>
 
                         <a asp-controller="Posudba"
                            asp-action="Create"
                            asp-route-id="@knjiga.IdKnjige"
-                           class="btn-search-book">
+                           class="search-book-button">
                             Posudi
                         </a>
 
