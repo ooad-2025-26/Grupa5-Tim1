@@ -2,6 +2,6 @@
 {
     public enum Uloga
     {
-        Bibliotekar, Administrator, Korisnik
+        Bibliotekar, Administrator, User
     }
 }

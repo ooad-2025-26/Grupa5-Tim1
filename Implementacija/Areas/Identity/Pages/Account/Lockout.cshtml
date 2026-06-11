@@ -1,0 +1,25 @@
+﻿@page
+
+@{
+    ViewData["Title"] = "Pristup nalogu je onemogućen";
+}
+
+<div class="account-status-page">
+    <section class="account-status-card" role="alert" aria-labelledby="lockout-title">
+        <div class="account-status-icon" aria-hidden="true">!</div>
+
+        <p class="account-status-label">Obavještenje o korisničkom nalogu</p>
+        <h1 id="lockout-title">Pristup nalogu je onemogućen</h1>
+
+        <p class="account-status-message">
+            Vaš korisnički nalog trenutno nije aktivan, zbog čega prijava u sistem nije moguća.
+        </p>
+        <p class="account-status-help">
+            Za dodatne informacije ili ponovno aktiviranje naloga obratite se biblioteci.
+        </p>
+
+        <div class="account-status-actions">
+            <a asp-page="./Login" class="btn btn-primary">Nazad na prijavu</a>
+        </div>
+    </section>
+</div>

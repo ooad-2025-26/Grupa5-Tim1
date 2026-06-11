@@ -9,7 +9,7 @@ html {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(166, 83, 79, 0.35);
 }
 
 html {
@@ -19,10 +19,93 @@ html {
 }
 
 body {
-    margin-bottom: 60px;
     background: #f8ede9;
     color: #4b3330;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     overflow-x: hidden;
+}
+a {
+    color: #994b47;
+}
+
+    a:hover,
+    a:focus {
+        color: #783a37;
+    }
+
+.btn-primary {
+    background-color: #a6534f;
+    border-color: #a6534f;
+    color: #fff;
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:active,
+    .btn-primary.active,
+    .show > .btn-primary.dropdown-toggle {
+        background-color: #8d4541;
+        border-color: #8d4541;
+        color: #fff;
+    }
+
+.btn-outline-primary {
+    border-color: #a6534f;
+    color: #994b47;
+}
+
+    .btn-outline-primary:hover,
+    .btn-outline-primary:focus,
+    .btn-outline-primary:active,
+    .btn-outline-primary.active,
+    .show > .btn-outline-primary.dropdown-toggle {
+        background-color: #a6534f;
+        border-color: #a6534f;
+        color: #fff;
+    }
+
+.btn-link {
+    color: #994b47;
+}
+
+    .btn-link:hover,
+    .btn-link:focus {
+        color: #783a37;
+    }
+
+.form-check-input:checked {
+    background-color: #a6534f;
+    border-color: #a6534f;
+}
+
+.page-content {
+    flex: 1 0 auto;
+    width: 100%;
+}
+
+.site-footer {
+    background: #f3dfd9;
+    border-top: 1px solid #dfcfc8;
+    color: #6f5550;
+    flex-shrink: 0;
+    margin-top: 2rem;
+    padding: 1rem 0;
+}
+
+.site-footer__content {
+    align-items: center;
+    display: flex;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 575px) {
+    .site-footer__content {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
 }
 
 .form-floating > .form-control-plaintext::placeholder,
@@ -463,6 +546,92 @@ body {
     color: #7c625d;
 }
 
+.account-status-page {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 2rem 1rem;
+}
+
+.account-status-card {
+    background: #fff8f6;
+    border: 1px solid #dfcfc8;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(85, 55, 50, 0.14);
+    max-width: 620px;
+    padding: 2.25rem;
+    text-align: center;
+    width: 100%;
+}
+
+.account-status-icon {
+    align-items: center;
+    background: #f3cccc;
+    border-radius: 50%;
+    color: #8a3434;
+    display: inline-flex;
+    font-size: 1.65rem;
+    font-weight: 700;
+    height: 58px;
+    justify-content: center;
+    margin-bottom: 1rem;
+    width: 58px;
+}
+
+.account-status-label {
+    color: #9b625c;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.45rem;
+    text-transform: uppercase;
+}
+
+.account-status-card h1 {
+    color: #4b3330;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.account-status-message {
+    color: #5f4844;
+    font-size: 1.08rem;
+    line-height: 1.6;
+    margin: 0 auto 0.65rem;
+    max-width: 500px;
+}
+
+.account-status-help {
+    color: #7c625d;
+    line-height: 1.55;
+    margin: 0 auto;
+    max-width: 500px;
+}
+
+.account-status-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1.75rem;
+}
+
+@media (max-width: 575px) {
+    .account-status-card {
+        padding: 1.5rem;
+    }
+
+        .account-status-card h1 {
+            font-size: 1.6rem;
+        }
+
+    .account-status-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
 /* ── Custom Popup ──────────────────────────────────────────── */
 .custom-popup {
     position: fixed;
@@ -808,6 +977,11 @@ body {
     margin: 0 auto 2rem;
     max-width: 960px;
     padding: 1.75rem;
+}
+
+.book-form-header--compact,
+.book-form-card--compact {
+    max-width: 720px;
 }
 
 .book-form-grid {

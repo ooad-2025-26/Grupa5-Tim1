@@ -1,0 +1,67 @@
+﻿@model bibliotecha.Models.ViewModels.KreirajKorisnikaViewModel
+
+@{
+    ViewData["Title"] = "Dodaj zaposlenika";
+}
+
+<div class="book-form-header">
+    <div>
+        <h1>Kreiraj zaposlenički nalog</h1>
+        <p>Unesite podatke za novi bibliotekarski ili administratorski nalog.</p>
+    </div>
+</div>
+
+<div class="book-form-card">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="book-form-grid">
+            <div class="form-group">
+                <label asp-for="Ime" class="form-label">Ime</label>
+                <input asp-for="Ime" class="form-control" autocomplete="given-name" />
+                <span asp-validation-for="Ime" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Prezime" class="form-label">Prezime</label>
+                <input asp-for="Prezime" class="form-control" autocomplete="family-name" />
+                <span asp-validation-for="Prezime" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email" class="form-label">Email adresa</label>
+                <input asp-for="Email" class="form-control" autocomplete="off" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Uloga" class="form-label">Uloga zaposlenika</label>
+                <select asp-for="Uloga" class="form-select">
+                    <option value="@((int)Uloga.Bibliotekar)">Bibliotekar</option>
+                    <option value="@((int)Uloga.Administrator)">Administrator</option>
+                </select>
+                <span asp-validation-for="Uloga" class="text-danger"></span>
+            </div>
+
+            <div class="form-group book-form-grid__full">
+                <label asp-for="Lozinka" class="form-label">Početna lozinka</label>
+                <input asp-for="Lozinka" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="Lozinka" class="text-danger"></span>
+                <small class="text-muted">
+                    Početnu lozinku potrebno je sigurno dostaviti zaposleniku.
+                </small>
+            </div>
+        </div>
+
+        <div class="book-form-actions">
+            <button type="submit" class="btn btn-primary">Kreiraj nalog</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

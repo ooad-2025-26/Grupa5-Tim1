@@ -1,0 +1,90 @@
+﻿@model bibliotecha.Models.ViewModels.KorisnikListaViewModel
+
+@{
+    ViewData["Title"] = "Upravljanje korisnicima";
+}
+
+<div class="management-header">
+    <div>
+        <h1>Upravljanje korisničkim nalozima</h1>
+        <p>Pregled, kreiranje, izmjena i deaktivacija korisničkih naloga.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">Dodaj novi nalog</a>
+</div>
+
+<form asp-action="Index" method="get" class="management-search management-search--filters">
+    <input type="text" name="q" value="@Model.Upit" placeholder="Pretraži po imenu ili emailu..." />
+    <select name="uloga" asp-items="Html.GetEnumSelectList<Uloga>()">
+        <option value="">Sve uloge</option>
+    </select>
+    <select name="aktivan">
+        <option value="">Svi statusi</option>
+        <option value="true" selected="@(Model.Aktivan == true)">Aktivni</option>
+        <option value="false" selected="@(Model.Aktivan == false)">Deaktivirani</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Filtriraj</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Očisti</a>
+</form>
+
+@if (TempData["Poruka"] is string poruka)
+{
+    <div class="alert alert-success">@poruka</div>
+}
+@if (TempData["Greska"] is string greska)
+{
+    <div class="alert alert-danger">@greska</div>
+}
+
+<div class="management-card table-responsive">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Korisnik</th>
+                <th>Email</th>
+                <th>Uloga</th>
+                <th>Članska kartica</th>
+                <th>Status</th>
+                <th class="text-end">Akcije</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var korisnik in Model.Korisnici)
+            {
+                var deaktiviran = korisnik.LockoutEnd.HasValue &&
+                    korisnik.LockoutEnd > DateTimeOffset.UtcNow;
+
+                <tr>
+                    <td>
+                        <strong>@korisnik.Ime @korisnik.Prezime</strong>
+                        @if (korisnik.DatumRegistracije.HasValue)
+                        {
+                            <small class="d-block text-muted">Registrovan: @korisnik.DatumRegistracije</small>
+                        }
+                    </td>
+                    <td>@korisnik.Email</td>
+                    <td>@korisnik.Uloga</td>
+                    <td>@(korisnik.BrojClanskeKartice?.ToString() ?? "-")</td>
+                    <td>
+                        <span class="status-badge @(deaktiviran ? "status-badge--inactive" : "status-badge--active")">
+                            @(deaktiviran ? "Deaktiviran" : "Aktivan")
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@korisnik.Id" class="btn btn-sm btn-outline-primary">Uredi</a>
+                        <form asp-action="PromijeniStatus" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@korisnik.Id" />
+                            <button type="submit" class="btn btn-sm @(deaktiviran ? "btn-outline-success" : "btn-outline-danger")">
+                                @(deaktiviran ? "Aktiviraj" : "Deaktiviraj")
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Korisnici.Any())
+{
+    <div class="alert alert-info mt-3">Nema korisnika koji odgovaraju odabranim kriterijima.</div>
+}

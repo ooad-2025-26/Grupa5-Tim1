@@ -1,0 +1,58 @@
+﻿@model bibliotecha.Models.ViewModels.UrediKorisnikaViewModel
+
+@{
+    ViewData["Title"] = "Uredi korisnika";
+}
+
+<h1>Uredi korisnički nalog</h1>
+
+<div class="row">
+    <div class="col-md-7 col-lg-6">
+        <form asp-action="Edit">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Ime" class="form-label"></label>
+                    <input asp-for="Ime" class="form-control" />
+                    <span asp-validation-for="Ime" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Prezime" class="form-label"></label>
+                    <input asp-for="Prezime" class="form-control" />
+                    <span asp-validation-for="Prezime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Uloga" class="form-label"></label>
+                    <select asp-for="Uloga" class="form-select" asp-items="Html.GetEnumSelectList<Uloga>()"></select>
+                    <span asp-validation-for="Uloga" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="BrojClanskeKartice" class="form-label">Broj članske kartice</label>
+                    <input asp-for="BrojClanskeKartice" class="form-control" />
+                    <span asp-validation-for="BrojClanskeKartice" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DatumZaposlenja" class="form-label">Datum zaposlenja</label>
+                <input asp-for="DatumZaposlenja" class="form-control" />
+                <span asp-validation-for="DatumZaposlenja" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Sačuvaj izmjene</button>
+            <a asp-action="Index" class="btn btn-link">Odustani</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
