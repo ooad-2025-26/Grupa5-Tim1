@@ -240,9 +240,9 @@ namespace bibliotecha.Controllers
                 return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
             }
 
-            if (posudba.BrojProduzenja >= 3)
+            if (posudba.BrojProduzenja >= 1)
             {
-                TempData["Poruka"] = "Posudbu nije moguće produžiti više od 3 puta.";
+                TempData["Poruka"] = "Posudbu nije moguće produžiti više od jedanput.";
                 return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
             }
 

@@ -8,16 +8,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using bibliotecha.Data;
 using bibliotecha.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace bibliotecha.Controllers
 {
     public class KnjigaController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<Korisnik> _userManager;
 
-        public KnjigaController(ApplicationDbContext context)
+        public KnjigaController(ApplicationDbContext context, UserManager<Korisnik> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Knjiga
@@ -61,7 +64,26 @@ namespace bibliotecha.Controllers
             {
                 return NotFound();
             }
+            bool imaAktivnuPosudbu = false;
 
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var korisnik = await _userManager.GetUserAsync(User);
+
+                if (korisnik != null)
+                {
+                    imaAktivnuPosudbu = await _context.Posudba
+                        .Include(p => p.Primjerak)
+                        .AnyAsync(p =>
+                            p.KorisnikId == korisnik.Id &&
+                            p.Primjerak.KnjigaId == knjiga.IdKnjige &&
+                            (p.Status == StatusPosudbe.Online ||
+                             p.Status == StatusPosudbe.Aktivna ||
+                             p.Status == StatusPosudbe.Produzena));
+                }
+            }
+
+            ViewData["ImaAktivnuPosudbu"] = imaAktivnuPosudbu;
             return View(knjiga);
         }
 
