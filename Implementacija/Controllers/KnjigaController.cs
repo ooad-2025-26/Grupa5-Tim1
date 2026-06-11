@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using bibliotecha.Data;
 using bibliotecha.Models;
 
@@ -20,10 +21,28 @@ namespace bibliotecha.Controllers
         }
 
         // GET: Knjiga
-        public async Task<IActionResult> Index()
+        [Authorize(Roles = "Bibliotekar,Administrator")]
+        public async Task<IActionResult> Index(string? q)
         {
-            var applicationDbContext = _context.Knjiga.Include(k => k.Autor);
-            return View(await applicationDbContext.ToListAsync());
+            var query = _context.Knjiga
+                .Include(k => k.Autor)
+                .Include(k => k.Primjerci)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                query = query.Where(k =>
+                    k.Naslov.Contains(q) ||
+                    k.ISBN.Contains(q) ||
+                    k.Autor.Ime.Contains(q) ||
+                    k.Autor.Prezime.Contains(q));
+            }
+
+            ViewData["Upit"] = q;
+
+            return View(await query
+                .OrderBy(k => k.Naslov)
+                .ToListAsync());
         }
 
         // GET: Knjiga/Details/5
@@ -36,6 +55,7 @@ namespace bibliotecha.Controllers
 
             var knjiga = await _context.Knjiga
                 .Include(k => k.Autor)
+                .Include(k => k.Primjerci)
                 .FirstOrDefaultAsync(m => m.IdKnjige == id);
             if (knjiga == null)
             {
@@ -46,6 +66,7 @@ namespace bibliotecha.Controllers
         }
 
         // GET: Knjiga/Create
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public IActionResult Create()
         {
             PopuniAutore();
@@ -57,6 +78,7 @@ namespace bibliotecha.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> Create([Bind("IdKnjige,ISBN,Naslov,AutorId,Zanr,Opis,DatumIzdavanja,Izdavac,BrojStranica,Jezik,KoricaKnjige,ProsjecnaOcjena")] Knjiga knjiga)
         {
             ModelState.Remove(nameof(Knjiga.Autor));
@@ -72,6 +94,7 @@ namespace bibliotecha.Controllers
         }
 
         // GET: Knjiga/Edit/5
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -93,6 +116,7 @@ namespace bibliotecha.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> Edit(int id, [Bind("IdKnjige,ISBN,Naslov,AutorId,Zanr,Opis,DatumIzdavanja,Izdavac,BrojStranica,Jezik,KoricaKnjige,ProsjecnaOcjena")] Knjiga knjiga)
         {
             if (id != knjiga.IdKnjige)
@@ -127,6 +151,7 @@ namespace bibliotecha.Controllers
         }
 
         // GET: Knjiga/Delete/5
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -148,6 +173,7 @@ namespace bibliotecha.Controllers
         // POST: Knjiga/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var knjiga = await _context.Knjiga.FindAsync(id);
@@ -168,6 +194,8 @@ namespace bibliotecha.Controllers
         private void PopuniAutore(int? odabraniAutorId = null)
         {
             var autori = _context.Autor
+                .OrderBy(a => a.Prezime)
+                .ThenBy(a => a.Ime)
                 .Select(a => new
                 {
                     a.IdAutora,

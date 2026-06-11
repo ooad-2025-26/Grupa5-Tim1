@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using bibliotecha.Data;
 using bibliotecha.Models;
 
 namespace bibliotecha.Controllers
 {
+    [Authorize(Roles = "Bibliotekar,Administrator")]
     public class PrimjerakController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -22,8 +24,12 @@ namespace bibliotecha.Controllers
         // GET: Primjerak
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Primjerak.Include(p => p.Knjiga);
-            return View(await applicationDbContext.ToListAsync());
+            var primjerci = _context.Primjerak
+                .Include(p => p.Knjiga)
+                .OrderBy(p => p.Knjiga.Naslov)
+                .ThenBy(p => p.IdPrimjerka);
+
+            return View(await primjerci.ToListAsync());
         }
 
         // GET: Primjerak/Details/5
@@ -46,10 +52,15 @@ namespace bibliotecha.Controllers
         }
 
         // GET: Primjerak/Create
-        public IActionResult Create()
+        public IActionResult Create(int? knjigaId)
         {
-            ViewData["KnjigaId"] = new SelectList(_context.Knjiga, "IdKnjige", "IdKnjige");
-            return View();
+            PopuniKnjige(knjigaId);
+
+            return View(new Primjerak
+            {
+                KnjigaId = knjigaId ?? 0,
+                Status = StatusPrimjerka.Dostupan
+            });
         }
 
         // POST: Primjerak/Create
@@ -59,16 +70,18 @@ namespace bibliotecha.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdPrimjerka,Status,KnjigaId")] Primjerak primjerak)
         {
-            //privremeno ova jedna linija
-            ModelState.Remove(nameof(Primjerak.Knjiga));
+            ModelState.Remove("Knjiga");
 
             if (ModelState.IsValid)
             {
                 _context.Add(primjerak);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                TempData["Poruka"] = "Novi primjerak je uspješno dodan.";
+                return RedirectToAction("Index", "Knjiga");
             }
-            ViewData["KnjigaId"] = new SelectList(_context.Knjiga, "IdKnjige", "IdKnjige", primjerak.KnjigaId);
+
+            PopuniKnjige(primjerak.KnjigaId);
             return View(primjerak);
         }
 
@@ -85,7 +98,7 @@ namespace bibliotecha.Controllers
             {
                 return NotFound();
             }
-            ViewData["KnjigaId"] = new SelectList(_context.Knjiga, "IdKnjige", "IdKnjige", primjerak.KnjigaId);
+            PopuniKnjige(primjerak.KnjigaId);
             return View(primjerak);
         }
 
@@ -94,12 +107,14 @@ namespace bibliotecha.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdPrimjerka,Status,KnjigaId")] Primjerak primjerak)
+        public async Task<IActionResult> Edit( int id, [Bind("IdPrimjerka,Status,KnjigaId")] Primjerak primjerak)
         {
             if (id != primjerak.IdPrimjerka)
             {
                 return NotFound();
             }
+
+            ModelState.Remove(nameof(Primjerak.Knjiga));
 
             if (ModelState.IsValid)
             {
@@ -114,14 +129,17 @@ namespace bibliotecha.Controllers
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    throw;
                 }
-                return RedirectToAction(nameof(Index));
+
+                TempData["Poruka"] =
+                    "Podaci o primjerku su uspješno izmijenjeni.";
+
+                return RedirectToAction("Index", "Knjiga");
             }
-            ViewData["KnjigaId"] = new SelectList(_context.Knjiga, "IdKnjige", "IdKnjige", primjerak.KnjigaId);
+
+            PopuniKnjige(primjerak.KnjigaId);
             return View(primjerak);
         }
 
@@ -156,12 +174,32 @@ namespace bibliotecha.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            TempData["Poruka"] = "Primjerak je uspješno obrisan.";
+            return RedirectToAction("Index", "Knjiga");
         }
 
         private bool PrimjerakExists(int id)
         {
             return _context.Primjerak.Any(e => e.IdPrimjerka == id);
         }
+
+        private void PopuniKnjige(int? odabranaKnjigaId = null)
+        {
+            var knjige = _context.Knjiga
+                .OrderBy(k => k.Naslov)
+                .Select(k => new
+                {
+                    k.IdKnjige,
+                    Naziv = k.Naslov + " (ISBN: " + k.ISBN + ")"
+                });
+
+            ViewData["KnjigaId"] = new SelectList(
+                knjige,
+                "IdKnjige",
+                "Naziv",
+                odabranaKnjigaId);
+        }
+
     }
 }

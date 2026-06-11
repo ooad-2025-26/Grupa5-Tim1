@@ -1,69 +1,78 @@
 ﻿@model bibliotecha.Models.Knjiga
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Kreiraj knjigu";
 }
 
-<h1>Create</h1>
+<div class="book-form-header">
+    <div>
+        <h1>Kreiraj knjigu</h1>
+        <p>Unesite bibliografske podatke za novu knjigu u katalogu.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Nazad na katalog</a>
+</div>
 
-<h4>Knjiga</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="All" class="text-danger"></div>
+<div class="book-form-card">
+    <form asp-action="Create">
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+        <div class="book-form-grid">
             <div class="form-group">
-                <label asp-for="ISBN" class="control-label"></label>
-                <input asp-for="ISBN" class="form-control" />
-                <span asp-validation-for="ISBN" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Naslov" class="control-label"></label>
+                <label asp-for="Naslov" class="form-label">Naslov</label>
                 <input asp-for="Naslov" class="form-control" />
                 <span asp-validation-for="Naslov" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="AutorId" class="control-label"></label>
-                <select asp-for="AutorId" class="form-control" asp-items="ViewBag.AutorId"></select>
+                <label asp-for="ISBN" class="form-label">ISBN</label>
+                <input asp-for="ISBN" class="form-control" />
+                <span asp-validation-for="ISBN" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="AutorId" class="form-label">Autor</label>
+                <select asp-for="AutorId" class="form-select" asp-items="ViewBag.AutorId"></select>
                 <span asp-validation-for="AutorId" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="Zanr" class="control-label"></label>
-                <select asp-for="Zanr" class="form-control" asp-items="Html.GetEnumSelectList<Zanr>()"></select>
+                <label asp-for="Zanr" class="form-label">Žanr</label>
+                <select asp-for="Zanr" class="form-select" asp-items="Html.GetEnumSelectList<Zanr>()"></select>
                 <span asp-validation-for="Zanr" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Opis" class="control-label"></label>
-                <input asp-for="Opis" class="form-control" />
+
+            <div class="form-group book-form-grid__full">
+                <label asp-for="Opis" class="form-label">Opis</label>
+                <textarea asp-for="Opis" class="form-control" rows="5"></textarea>
                 <span asp-validation-for="Opis" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="DatumIzdavanja" class="control-label"></label>
+                <label asp-for="DatumIzdavanja" class="form-label">Datum izdavanja</label>
                 <input asp-for="DatumIzdavanja" class="form-control" />
                 <span asp-validation-for="DatumIzdavanja" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="Izdavac" class="control-label"></label>
+                <label asp-for="Izdavac" class="form-label">Izdavač</label>
                 <input asp-for="Izdavac" class="form-control" />
                 <span asp-validation-for="Izdavac" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="BrojStranica" class="control-label"></label>
+                <label asp-for="BrojStranica" class="form-label">Broj stranica</label>
                 <input asp-for="BrojStranica" class="form-control" />
                 <span asp-validation-for="BrojStranica" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="Jezik" class="control-label"></label>
-                <select asp-for="Jezik" class="form-control" asp-items="Html.GetEnumSelectList<Jezik>()"></select>
+                <label asp-for="Jezik" class="form-label">Jezik</label>
+                <select asp-for="Jezik" class="form-select" asp-items="Html.GetEnumSelectList<Jezik>()"></select>
                 <span asp-validation-for="Jezik" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="KoricaKnjige" class="control-label"></label>
-                <input asp-for="KoricaKnjige" class="form-control" />
-                <span asp-validation-for="KoricaKnjige" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ProsjecnaOcjena" class="control-label"></label>
+                <label asp-for="ProsjecnaOcjena" class="form-label">Prosječna ocjena</label>
                 <input asp-for="ProsjecnaOcjena"
                        class="form-control"
                        type="number"
@@ -72,15 +81,19 @@
                        max="5" />
                 <span asp-validation-for="ProsjecnaOcjena" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+            <div class="form-group">
+                <label asp-for="KoricaKnjige" class="form-label">Link slike korice</label>
+                <input asp-for="KoricaKnjige" class="form-control" />
+                <span asp-validation-for="KoricaKnjige" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="book-form-actions">
+            <input type="submit" value="Kreiraj knjigu" class="btn btn-primary" />
+            <a asp-action="Index" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {

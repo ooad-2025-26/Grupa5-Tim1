@@ -1,95 +1,101 @@
 ﻿@model IEnumerable<bibliotecha.Models.Knjiga>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Upravljanje katalogom";
 }
 
-<h1>Index</h1>
+<div class="management-header">
+    <div>
+        <h1>Upravljanje knjigama i primjercima</h1>
+        <p>Pregled i održavanje kataloga i fizičkih primjeraka knjiga.</p>
+    </div>
+    <div class="management-actions">
+        <a asp-action="Create" class="btn btn-primary">Dodaj novu knjigu</a>
+        <a asp-controller="Primjerak" asp-action="Create" class="btn btn-outline-primary">Dodaj novi primjerak</a>
+    </div>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ISBN)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Naslov)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Autor)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Zanr)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Opis)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DatumIzdavanja)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Izdavac)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BrojStranica)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Jezik)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.KoricaKnjige)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProsjecnaOcjena)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ISBN)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Naslov)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Autor.IdAutora)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Zanr)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Opis)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DatumIzdavanja)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Izdavac)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrojStranica)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Jezik)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.KoricaKnjige)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProsjecnaOcjena)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdKnjige">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdKnjige">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdKnjige">Delete</a>
-            </td>
-        </tr>
+<form asp-action="Index" method="get" class="management-search">
+    <input type="text"
+           name="q"
+           value="@ViewData["Upit"]"
+           placeholder="Pretraži po naslovu, autoru ili ISBN-u..."
+           autocomplete="off" />
+    <button type="submit" class="btn btn-primary">Pretraži</button>
+    @if (!string.IsNullOrWhiteSpace(ViewData["Upit"]?.ToString()))
+    {
+        <a asp-action="Index" class="btn btn-outline-secondary">Očisti</a>
+    }
+</form>
+
+@if (TempData["Poruka"] is string poruka)
+{
+    <div class="alert alert-success">@poruka</div>
 }
-    </tbody>
-</table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Nema knjiga koje odgovaraju pretrazi.</div>
+}
+
+@foreach (var knjiga in Model)
+{
+    var dostupno = knjiga.Primjerci.Count(p => p.Status == StatusPrimjerka.Dostupan);
+
+    <section class="management-card">
+        <div class="catalog-summary">
+            <div>
+                <h2>@knjiga.Naslov</h2>
+                <p>@knjiga.Autor.Ime @knjiga.Autor.Prezime</p>
+                <small>ISBN: @knjiga.ISBN | @knjiga.Zanr</small>
+            </div>
+            <div class="management-badges">
+                <span><strong>@knjiga.Primjerci.Count</strong> ukupno</span>
+                <span><strong>@dostupno</strong> dostupno</span>
+            </div>
+            <div class="management-actions">
+                <a asp-action="Details" asp-route-id="@knjiga.IdKnjige" class="btn btn-sm btn-outline-secondary">Detalji</a>
+                <a asp-action="Edit" asp-route-id="@knjiga.IdKnjige" class="btn btn-sm btn-outline-primary">Uredi knjigu</a>
+                <a asp-controller="Primjerak" asp-action="Create" asp-route-knjigaId="@knjiga.IdKnjige"
+                   class="btn btn-sm btn-primary">Dodaj primjerak</a>
+                <a asp-action="Delete" asp-route-id="@knjiga.IdKnjige" class="btn btn-sm btn-outline-danger">Obriši knjigu</a>
+            </div>
+        </div>
+
+        @if (knjiga.Primjerci.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Interni ID primjerka</th>
+                            <th>Status</th>
+                            <th class="text-end">Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var primjerak in knjiga.Primjerci.OrderBy(p => p.IdPrimjerka))
+                        {
+                            <tr>
+                                <td>#@primjerak.IdPrimjerka</td>
+                                <td><span class="status-badge status-badge--@primjerak.Status.ToString().ToLowerInvariant()">@primjerak.Status</span></td>
+                                <td class="text-end">
+                                    <a asp-controller="Primjerak" asp-action="Details" asp-route-id="@primjerak.IdPrimjerka" class="btn btn-sm btn-link">Detalji</a>
+                                    <a asp-controller="Primjerak" asp-action="Edit" asp-route-id="@primjerak.IdPrimjerka" class="btn btn-sm btn-link">Uredi</a>
+                                    <a asp-controller="Primjerak" asp-action="Delete" asp-route-id="@primjerak.IdPrimjerka" class="btn btn-sm btn-link text-danger">Obriši</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="management-empty">
+                Ova knjiga nema evidentiranih primjeraka.
+                <a asp-controller="Primjerak" asp-action="Create" asp-route-knjigaId="@knjiga.IdKnjige">Dodaj prvi primjerak</a>.
+            </div>
+        }
+    </section>
+}

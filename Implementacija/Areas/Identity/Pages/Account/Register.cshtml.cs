@@ -131,6 +131,7 @@ namespace bibliotecha.Areas.Identity.Pages.Account
                 user.Prezime = Input.Prezime;
                 user.BrojClanskeKartice = Input.BrojClanskeKartice;
                 user.DatumRegistracije = DateOnly.FromDateTime(DateTime.Now);
+                user.Uloga = Uloga.Korisnik;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -139,6 +140,7 @@ namespace bibliotecha.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    await _userManager.AddToRoleAsync(user, Uloga.Korisnik.ToString());
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);

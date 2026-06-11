@@ -640,3 +640,237 @@ body {
         padding: 1.5rem;
     }
 }
+
+
+/* Management pages */
+.management-header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin: 1.5rem 0;
+}
+
+    .management-header h1 {
+        color: #4b3330;
+        margin-bottom: 0.25rem;
+    }
+
+    .management-header p {
+        color: #7c625d;
+        margin: 0;
+    }
+
+.management-actions,
+.management-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.management-search {
+    align-items: center;
+    background: #f9eee9;
+    border: 1px solid #dfcfc8;
+    border-radius: 8px;
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+    padding: 0.8rem 1rem;
+}
+
+    .management-search input,
+    .management-search select {
+        background: #fff;
+        border: 1px solid #dfcfc8;
+        border-radius: 6px;
+        min-height: 38px;
+        padding: 0.4rem 0.7rem;
+    }
+
+    .management-search input {
+        flex: 1;
+    }
+
+.management-search--filters {
+    flex-wrap: wrap;
+}
+
+    .management-search--filters input {
+        min-width: 240px;
+    }
+
+.management-card {
+    background: #fff8f6;
+    border: 1px solid #dfcfc8;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(85, 55, 50, 0.12);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.catalog-summary {
+    align-items: center;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(220px, 1fr) auto auto;
+    padding: 1rem 1.25rem;
+}
+
+    .catalog-summary h2 {
+        color: #c9635e;
+        font-size: 1.25rem;
+        margin: 0 0 0.25rem;
+    }
+
+    .catalog-summary p {
+        margin-bottom: 0.2rem;
+    }
+
+.management-badges span {
+    background: #f4e4df;
+    border-radius: 6px;
+    padding: 0.45rem 0.65rem;
+}
+
+.management-card .table th,
+.management-card .table td {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+}
+
+.management-empty {
+    border-top: 1px solid #dfcfc8;
+    color: #7c625d;
+    padding: 0.85rem 1.25rem;
+}
+
+.status-badge {
+    background: #eadbd5;
+    border-radius: 999px;
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+}
+
+.status-badge--dostupan,
+.status-badge--active {
+    background: #dcebdc;
+    color: #275f35;
+}
+
+.status-badge--posudjen,
+.status-badge--rezervisan {
+    background: #f7e3bf;
+    color: #78551a;
+}
+
+.status-badge--izgubljen,
+.status-badge--inactive {
+    background: #f3cccc;
+    color: #7b2929;
+}
+
+.book-form-header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin: 1.5rem auto 1rem;
+    max-width: 960px;
+}
+
+    .book-form-header h1 {
+        color: #4b3330;
+        margin-bottom: 0.25rem;
+    }
+
+    .book-form-header p {
+        color: #7c625d;
+        margin: 0;
+    }
+
+.book-form-card {
+    background: #fff8f6;
+    border: 1px solid #dfcfc8;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(85, 55, 50, 0.12);
+    margin: 0 auto 2rem;
+    max-width: 960px;
+    padding: 1.75rem;
+}
+
+.book-form-grid {
+    display: grid;
+    gap: 1.15rem 1.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.book-form-grid__full {
+    grid-column: 1 / -1;
+}
+
+.book-form-card .form-label {
+    color: #4b3330;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.book-form-card .form-control,
+.book-form-card .form-select {
+    background-color: #fff;
+    border-color: #d8c5be;
+    min-height: 42px;
+}
+
+.book-form-card textarea.form-control {
+    min-height: 125px;
+    resize: vertical;
+}
+
+.book-form-card .form-control:focus,
+.book-form-card .form-select:focus {
+    border-color: #c9635e;
+    box-shadow: 0 0 0 0.2rem rgba(201, 99, 94, 0.18);
+}
+
+.book-form-card .validation-summary-valid {
+    display: none;
+}
+
+.book-form-actions {
+    border-top: 1px solid #dfcfc8;
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+}
+
+@media (max-width: 991px) {
+    .management-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .catalog-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .book-form-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .book-form-card {
+        padding: 1.25rem;
+    }
+
+    .book-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .book-form-grid__full {
+        grid-column: auto;
+    }
+}

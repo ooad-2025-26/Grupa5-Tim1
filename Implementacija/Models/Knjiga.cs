@@ -67,6 +67,9 @@ namespace bibliotecha.Models
         [DisplayName("Prosječna ocjena")]
         public float ProsjecnaOcjena { get; set; }
 
+        public ICollection<Primjerak> Primjerci { get; set; } = new List<Primjerak>();
+
+
         public Knjiga() { }
     }
 }

@@ -1,37 +1,36 @@
 ﻿@model bibliotecha.Models.Primjerak
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Dodaj primjerak";
 }
 
-<h1>Create</h1>
+<h1>Dodaj novi primjerak</h1>
+<p>Svaki primjerak predstavlja jednu fizičku kopiju odabrane knjige.</p>
 
-<h4>Primjerak</h4>
-<hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6 col-lg-5">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<StatusPrimjerka>()"></select>
+            <div class="mb-3">
+                <label asp-for="KnjigaId" class="form-label">Knjiga</label>
+                <select asp-for="KnjigaId" class="form-select" asp-items="ViewBag.KnjigaId">
+                    <option value="">Odaberite knjigu</option>
+                </select>
+                <span asp-validation-for="KnjigaId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Status" class="form-label">Početni status</label>
+                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<StatusPrimjerka>()"></select>
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="KnjigaId" class="control-label"></label>
-                <select asp-for="KnjigaId" class ="form-control" asp-items="ViewBag.KnjigaId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+            <button type="submit" class="btn btn-primary">Dodaj primjerak</button>
+            <a asp-controller="Knjiga" asp-action="Index" class="btn btn-link">Odustani</a>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
