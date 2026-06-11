@@ -1,7 +1,19 @@
-﻿namespace bibliotecha.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace bibliotecha.Models
 {
     public enum StatusRezervacije
     {
-        Aktivna, Istekla, Ispunjena, spremnaZaPreuzimanje
+        [Display(Name = "Aktivna")]
+        Aktivna,
+
+        [Display(Name = "Istekla")]
+        Istekla,
+
+        [Display(Name = "Ispunjena")]
+        Ispunjena,
+
+        [Display(Name = "Spremna za preuzimanje")]
+        spremnaZaPreuzimanje
     }
 }

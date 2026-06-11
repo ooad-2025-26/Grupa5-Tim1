@@ -7,16 +7,20 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using bibliotecha.Data;
 using bibliotecha.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace bibliotecha.Controllers
 {
     public class RezervacijasController : Controller
     {
         private readonly ApplicationDbContext _context;
+       private readonly UserManager<Korisnik> _userManager;
 
-        public RezervacijasController(ApplicationDbContext context)
+        public RezervacijasController(ApplicationDbContext context, UserManager<Korisnik> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Rezervacijas
@@ -160,6 +164,57 @@ namespace bibliotecha.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Rezervisi(int knjigaId)
+        {
+            var korisnik = await _userManager.GetUserAsync(User);
+
+            if (korisnik == null)
+            {
+                return Challenge();
+            }
+
+            var knjigaPostoji = await _context.Knjiga
+                .AnyAsync(k => k.IdKnjige == knjigaId);
+
+            if (!knjigaPostoji)
+            {
+                return NotFound();
+            }
+
+            var vecPostojiRezervacija = await _context.Rezervacija
+                .AnyAsync(r =>
+                    r.KnjigaId == knjigaId &&
+                    r.KorisnikId == korisnik.Id &&
+                    r.Status == StatusRezervacije.Aktivna);
+
+            if (vecPostojiRezervacija)
+            {
+                return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
+            }
+
+            int pozicijaURedu = await _context.Rezervacija
+                .CountAsync(r =>
+                    r.KnjigaId == knjigaId &&
+                    r.Status == StatusRezervacije.Aktivna) + 1;
+
+            var rezervacija = new Rezervacija
+            {
+                KnjigaId = knjigaId,
+                KorisnikId = korisnik.Id,
+                DatumRezervacije = DateOnly.FromDateTime(DateTime.Now),
+                Status = StatusRezervacije.Aktivna,
+                PozicijaURedu = pozicijaURedu
+            };
+
+            _context.Rezervacija.Add(rezervacija);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
         }
 
         private bool RezervacijaExists(int id)

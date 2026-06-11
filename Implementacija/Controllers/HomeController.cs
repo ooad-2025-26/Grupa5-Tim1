@@ -26,7 +26,7 @@ namespace bibliotecha.Controllers
             var sekcije = knjige
                 .GroupBy(knjiga => knjiga.Zanr)
                 .OrderBy(grupa => grupa.Key)
-                .Select(grupa => new HomeBookSectionViewModel
+                .Select(grupa => new KnjigaBlokViewModel
                 {
                     Zanr = grupa.Key,
                     NazivZanra = FormatirajNazivZanra(grupa.Key),

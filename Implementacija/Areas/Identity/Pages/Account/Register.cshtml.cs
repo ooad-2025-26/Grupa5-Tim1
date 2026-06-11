@@ -81,7 +81,8 @@ namespace bibliotecha.Areas.Identity.Pages.Account
 
             [Required]
             [Display(Name = "Broj članske kartice")]
-            public string BrojClanskeKartice { get; set; }
+            public int? BrojClanskeKartice { get; set; }
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
