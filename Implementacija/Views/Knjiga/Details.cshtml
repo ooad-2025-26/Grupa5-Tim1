@@ -17,11 +17,17 @@
                 Posudi
             </button>
         </form>
-        <a class="book-details__button"
-           asp-controller="Posudba"
-           asp-action="Create">
-            Produži posudbu
-        </a>
+        <form asp-controller="Posudba"
+              asp-action="Produzi"
+              method="post">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="knjigaId" value="@Model.IdKnjige" />
+
+            <button type="submit" class="book-details__button">
+                Produži posudbu
+            </button>
+        </form>
     </div>
     <div class="book-details__info">
         <h1>@Model.Naslov</h1>

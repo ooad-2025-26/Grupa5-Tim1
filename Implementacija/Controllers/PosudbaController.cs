@@ -213,6 +213,60 @@ namespace bibliotecha.Controllers
 
             return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
         }
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Produzi(int knjigaId)
+        {
+            var korisnik = await _userManager.GetUserAsync(User);
+
+            if (korisnik == null)
+            {
+                return Challenge();
+            }
+
+            var posudba = await _context.Posudba
+                .Include(p => p.Primjerak)
+                .FirstOrDefaultAsync(p =>
+                    p.KorisnikId == korisnik.Id &&
+                    p.Primjerak.KnjigaId == knjigaId &&
+                    (p.Status == StatusPosudbe.Online ||
+                     p.Status == StatusPosudbe.Aktivna ||
+                     p.Status == StatusPosudbe.Produzena));
+
+            if (posudba == null)
+            {
+                TempData["Poruka"] = "Nemate aktivnu posudbu za ovu knjigu.";
+                return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
+            }
+
+            if (posudba.BrojProduzenja >= 3)
+            {
+                TempData["Poruka"] = "Posudbu nije moguće produžiti više od 3 puta.";
+                return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
+            }
+
+            bool postojiAktivnaRezervacija = await _context.Rezervacija
+                .AnyAsync(r =>
+                    r.KnjigaId == knjigaId &&
+                    r.Status == StatusRezervacije.Aktivna);
+
+            if (postojiAktivnaRezervacija)
+            {
+                TempData["Poruka"] = "Posudbu nije moguće produžiti jer postoji aktivna rezervacija za ovu knjigu.";
+                return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
+            }
+
+            posudba.RokVracanja = posudba.RokVracanja.AddDays(7);
+            posudba.BrojProduzenja = (posudba.BrojProduzenja ?? 0) + 1;
+            posudba.Status = StatusPosudbe.Produzena;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Poruka"] = "Posudba je uspješno produžena.";
+
+            return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
+        }
 
         private bool PosudbaExists(int id)
         {
