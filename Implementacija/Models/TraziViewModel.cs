@@ -2,8 +2,8 @@
 {
     public enum SortiranjePo
     {
-        Ocjena,
         Naslov,
+        Ocjena,
         NajnovijeIzdanje,
         NajstarijeIzdanje,
         Autor
@@ -16,7 +16,7 @@
         public Jezik? Jezik { get; set; }
         public int? GodinaOd { get; set; }
         public int? GodinaDo { get; set; }
-        public SortiranjePo Sortiranje { get; set; } = SortiranjePo.Ocjena;
+        public SortiranjePo Sortiranje { get; set; } = SortiranjePo.Naslov;
         public List<Knjiga> Rezultati { get; set; } = new();
     }
 }

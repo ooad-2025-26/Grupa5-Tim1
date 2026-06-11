@@ -37,7 +37,7 @@ namespace bibliotecha.Controllers
             return View(sekcije);
         }
 
-        public async Task<IActionResult> Trazi(string? q, Zanr? zanr, Jezik? jezik, int? godinaOd, int? godinaDo, SortiranjePo sortiranje = SortiranjePo.Ocjena)
+        public async Task<IActionResult> Trazi(string? q, Zanr? zanr, Jezik? jezik, int? godinaOd, int? godinaDo, SortiranjePo sortiranje = SortiranjePo.Naslov)
         {
             var query = _context.Knjiga
                 .Include(k => k.Autor)
@@ -67,7 +67,8 @@ namespace bibliotecha.Controllers
                 SortiranjePo.NajnovijeIzdanje => query.OrderByDescending(k => k.DatumIzdavanja),
                 SortiranjePo.NajstarijeIzdanje => query.OrderBy(k => k.DatumIzdavanja),
                 SortiranjePo.Autor => query.OrderBy(k => k.Autor.Prezime).ThenBy(k => k.Autor.Ime),
-                _ => query.OrderByDescending(k => k.ProsjecnaOcjena).ThenBy(k => k.Naslov)
+                SortiranjePo.Ocjena => query.OrderByDescending(k => k.ProsjecnaOcjena).ThenBy(k => k.Naslov),
+                _ => query.OrderBy(k => k.Naslov)
             };
 
             var rezultati = await query.ToListAsync();

@@ -43,8 +43,8 @@
                    value="@Model.GodinaDo"
                    min="1000" max="2100" />
             <select name="sortiranje" class="search-form__select search-form__select--sort">
-                <option value="0" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.Ocjena)">Ocjena (najviša)</option>
-                <option value="1" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.Naslov)">Naslov (A → Z)</option>
+                <option value="0" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.Naslov)">Naslov (A → Z)</option>
+                <option value="1" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.Ocjena)">Ocjena (najviša)</option>
                 <option value="2" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.NajnovijeIzdanje)">Najnovije izdanje</option>
                 <option value="3" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.NajstarijeIzdanje)">Najstarije izdanje</option>
                 <option value="4" selected="@(Model.Sortiranje == bibliotecha.Models.SortiranjePo.Autor)">Autor (A → Z)</option>
@@ -70,25 +70,56 @@
 
     @if (Model.Rezultati.Any())
     {
-        <div class="genre-section__shelf" style="flex-wrap: wrap; gap: 1.5rem; padding: 0.25rem;">
+        <div class="search-books-list">
             @foreach (var knjiga in Model.Rezultati)
             {
                 var korica = string.IsNullOrWhiteSpace(knjiga.KoricaKnjige)
                     ? Url.Content("~/images/book-placeholder.svg")
                     : knjiga.KoricaKnjige;
 
-                <div class="book-card">
-                    <div class="book-card__cover-wrap">
-                        <img class="book-card__cover"
-                             src="@korica"
-                             alt="Korica knjige @knjiga.Naslov" />
+                <div class="search-book-item">
+
+                    <div class="search-book-item__cover">
+                        <img src="@korica"
+                             alt="@knjiga.Naslov" />
                     </div>
-                    <a class="book-card__button"
-                       asp-controller="Knjiga"
-                       asp-action="Details"
-                       asp-route-id="@knjiga.IdKnjige">
-                        Pregled
-                    </a>
+
+                    <div class="search-book-item__info">
+
+                        <h3>@knjiga.Naslov</h3>
+
+                        <p class="search-book-item__author">
+                            od @knjiga.Autor.Ime @knjiga.Autor.Prezime
+                        </p>
+
+                        <div class="search-book-item__rating">
+                            ⭐ @knjiga.ProsjecnaOcjena.ToString("0.00")
+                        </div>
+
+                        <p class="search-book-item__genre">
+                            @knjiga.Zanr
+                        </p>
+
+                    </div>
+
+                    <div class="search-book-item__actions">
+
+                        <a asp-controller="Knjiga"
+                           asp-action="Details"
+                           asp-route-id="@knjiga.IdKnjige"
+                           class="btn-search-book">
+                            Pregled
+                        </a>
+
+                        <a asp-controller="Posudba"
+                           asp-action="Create"
+                           asp-route-id="@knjiga.IdKnjige"
+                           class="btn-search-book">
+                            Posudi
+                        </a>
+
+                    </div>
+
                 </div>
             }
         </div>
