@@ -121,9 +121,20 @@ namespace bibliotecha.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> Create(
-            [Bind("PrimjerakId,KorisnikId,DatumPreuzimanja")]
-    Posudba posudba)
+    [Bind("PrimjerakId,KorisnikId,DatumPreuzimanja")] Posudba posudba)
         {
+            if (posudba.DatumPreuzimanja.HasValue &&
+    posudba.DatumPreuzimanja.Value > DateOnly.FromDateTime(DateTime.Today))
+            {
+                ModelState.AddModelError(
+                    "DatumPreuzimanja",
+                    "Datum preuzimanja ne može biti u budućnosti.");
+            }
+
+            ModelState.Remove(nameof(Posudba.Korisnik));
+            ModelState.Remove(nameof(Posudba.Primjerak));
+
+
             var primjerak = await _context.Primjerak
                 .Include(p => p.Knjiga)
                 .FirstOrDefaultAsync(p => p.IdPrimjerka == posudba.PrimjerakId);
@@ -131,15 +142,23 @@ namespace bibliotecha.Controllers
 
             if (primjerak == null)
             {
-                ModelState.AddModelError("", "Odabrani primjerak ne postoji.");
+                ModelState.AddModelError("",
+                    "Odabrani primjerak ne postoji.");
             }
             else
             {
-                // provjera statusa primjerka
-                if (primjerak.Status == StatusPrimjerka.Posudjen)
+                var aktivnaPosudba = await _context.Posudba
+    .AnyAsync(p =>
+        p.PrimjerakId == primjerak.IdPrimjerka &&
+        (p.Status == StatusPosudbe.Online ||
+         p.Status == StatusPosudbe.Aktivna ||
+         p.Status == StatusPosudbe.Produzena));
+
+
+                if (aktivnaPosudba)
                 {
                     ModelState.AddModelError("",
-                        "Ovaj primjerak je već posuđen. Nije moguće napraviti novu posudbu.");
+                        "Ovaj primjerak je već posuđen (online ili preuzet) i nije dostupan.");
                 }
 
 
@@ -151,8 +170,12 @@ namespace bibliotecha.Controllers
                             r.Status == StatusRezervacije.spremnaZaPreuzimanje);
 
 
-                    if (rezervacija != null &&
-                        rezervacija.KorisnikId != posudba.KorisnikId)
+                    if (rezervacija == null)
+                    {
+                        ModelState.AddModelError("",
+                            "Ovaj primjerak je rezervisan.");
+                    }
+                    else if (rezervacija.KorisnikId != posudba.KorisnikId)
                     {
                         ModelState.AddModelError("",
                             "Ovaj primjerak je rezervisan za drugog korisnika.");
@@ -161,88 +184,60 @@ namespace bibliotecha.Controllers
             }
 
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var danas = posudba.DatumPreuzimanja
-                    ?? DateOnly.FromDateTime(DateTime.Today);
-
-
-                posudba.DatumPreuzimanja = danas;
-                posudba.DatumOnlinePosudbe = null;
-
-                posudba.RokVracanja =
-                    danas.AddDays(_notificationSettings.LoanDurationDays);
-
-                posudba.Status = StatusPosudbe.Aktivna;
-
-                posudba.BrojProduzenja = 0;
-
-
-                primjerak!.Status = StatusPrimjerka.Posudjen;
-
-
-                // ako je bio rezervisan, označi rezervaciju kao završenu
-                var spremnaRezervacija = await _context.Rezervacija
-                    .FirstOrDefaultAsync(r =>
-                        r.KnjigaId == primjerak.KnjigaId &&
-                        r.KorisnikId == posudba.KorisnikId &&
-                        r.Status == StatusRezervacije.spremnaZaPreuzimanje);
-
-
-                if (spremnaRezervacija != null)
-                {
-                    spremnaRezervacija.Status = StatusRezervacije.Ispunjena;
-                }
-
-
-                _context.Posudba.Add(posudba);
-
-                await _context.SaveChangesAsync();
-
-
-                TempData["Poruka"] =
-                    "Nova posudba je uspješno evidentirana.";
-
-                return RedirectToAction(nameof(Index));
+                PopuniSelecte(posudba);
+                return View(posudba);
             }
 
 
-
-            // ako validacija padne
-            ViewData["KorisnikId"] = new SelectList(
-                _context.Korisnik
-                    .OrderBy(k => k.Prezime)
-                    .Select(k => new
-                    {
-                        k.Id,
-                        Naziv = k.Ime + " " + k.Prezime +
-                                " (Kartica: " + k.BrojClanskeKartice + ")"
-                    }),
-                "Id",
-                "Naziv",
-                posudba.KorisnikId
-            );
+            var datumPreuzimanja =
+                posudba.DatumPreuzimanja
+                ?? DateOnly.FromDateTime(DateTime.Today);
 
 
-            ViewData["PrimjerakId"] = new SelectList(
-                _context.Primjerak
-                    .Include(p => p.Knjiga)
-                    .Where(p =>
-                        p.Status == StatusPrimjerka.Dostupan ||
-                        p.IdPrimjerka == posudba.PrimjerakId)
-                    .Select(p => new
-                    {
-                        p.IdPrimjerka,
-                        Naziv = "#" + p.IdPrimjerka +
-                                " - " + p.Knjiga.Naslov
-                    }),
-                "IdPrimjerka",
-                "Naziv",
-                posudba.PrimjerakId
-            );
+            posudba.DatumPreuzimanja = datumPreuzimanja;
+
+            posudba.DatumOnlinePosudbe = null;
 
 
-            return View(posudba);
+            posudba.RokVracanja =
+                datumPreuzimanja.AddDays(
+                    _notificationSettings.LoanDurationDays);
+
+
+            posudba.Status = StatusPosudbe.Aktivna;
+
+            posudba.BrojProduzenja = 0;
+
+
+            primjerak.Status = StatusPrimjerka.Posudjen;
+
+
+            var rezervacijaIsta = await _context.Rezervacija
+                .FirstOrDefaultAsync(r =>
+                    r.KnjigaId == primjerak.KnjigaId &&
+                    r.KorisnikId == posudba.KorisnikId &&
+                    r.Status == StatusRezervacije.spremnaZaPreuzimanje);
+
+
+            if (rezervacijaIsta != null)
+            {
+                rezervacijaIsta.Status =
+                    StatusRezervacije.Ispunjena;
+            }
+
+
+            _context.Posudba.Add(posudba);
+
+            await _context.SaveChangesAsync();
+
+
+            TempData["Poruka"] =
+                "Posudba je uspješno evidentirana.";
+
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Posudba/Edit/5
@@ -306,6 +301,15 @@ namespace bibliotecha.Controllers
             int id,
             [Bind("IdPosudbe,PrimjerakId,KorisnikId,DatumOnlinePosudbe,DatumPreuzimanja,RokVracanja,Status,BrojProduzenja")] Posudba posudba)
         {
+
+            if (posudba.DatumPreuzimanja.HasValue &&
+    posudba.DatumPreuzimanja.Value > DateOnly.FromDateTime(DateTime.Today))
+            {
+                ModelState.AddModelError(
+                    "DatumPreuzimanja",
+                    "Datum preuzimanja ne može biti u budućnosti.");
+            }
+
             if (id != posudba.IdPosudbe)
             {
                 return NotFound();
@@ -334,8 +338,7 @@ namespace bibliotecha.Controllers
                     postojecaPosudba.PrimjerakId = posudba.PrimjerakId;
                     postojecaPosudba.KorisnikId = posudba.KorisnikId;
 
-                    postojecaPosudba.DatumOnlinePosudbe =
-                        posudba.DatumOnlinePosudbe;
+                    
 
                     postojecaPosudba.DatumPreuzimanja =
                         posudba.DatumPreuzimanja;
@@ -613,7 +616,42 @@ namespace bibliotecha.Controllers
         .ToListAsync();
 
     return Json(primjerci);
+
+
 }
+        private void PopuniSelecte(Posudba posudba)
+        {
+            ViewData["KorisnikId"] = new SelectList(
+                _context.Korisnik
+                .OrderBy(k => k.Prezime)
+                .Select(k => new
+                {
+                    k.Id,
+                    Naziv = k.Ime + " " + k.Prezime
+                }),
+                "Id",
+                "Naziv",
+                posudba.KorisnikId);
+
+
+            ViewData["PrimjerakId"] = new SelectList(
+                _context.Primjerak
+                .Include(p => p.Knjiga)
+                .Where(p =>
+                    p.Status == StatusPrimjerka.Dostupan ||
+                    p.IdPrimjerka == posudba.PrimjerakId)
+                .Select(p => new
+                {
+                    p.IdPrimjerka,
+                    Naziv = "#" + p.IdPrimjerka +
+                            " - " +
+                            p.Knjiga.Naslov
+                }),
+                "IdPrimjerka",
+                "Naziv",
+                posudba.PrimjerakId);
+        }
+
         private bool PosudbaExists(int id)
         {
             return _context.Posudba.Any(e => e.IdPosudbe == id);

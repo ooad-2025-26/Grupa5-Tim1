@@ -82,8 +82,10 @@
 
                 <input asp-for="DatumPreuzimanja"
                        class="form-control"
-                       type="date" />
-
+                       type="date"
+                       max="@DateTime.Today.ToString("yyyy-MM-dd")"
+                       oninvalid="this.setCustomValidity('Datum preuzimanja ne može biti u budućnosti.')"
+                       oninput="this.setCustomValidity('')" />
 
                 <span asp-validation-for="DatumPreuzimanja"
                       class="text-danger">
@@ -118,9 +120,24 @@
 
 </div>
 
+<script>
+    $(function () {
+        $.extend($.validator.messages, {
+            max: "Datum preuzimanja ne može biti u budućnosti."
+        });
+    });
+</script>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(function () {
+            $.extend($.validator.messages, {
+                max: "Datum preuzimanja ne može biti u budućnosti."
+            });
+        });
+    </script>
 }
