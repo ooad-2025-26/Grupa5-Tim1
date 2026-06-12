@@ -1,0 +1,27 @@
+﻿@page
+
+@{
+    ViewData["Title"] = "Pristup nije dozvoljen";
+}
+
+<div class="account-status-page">
+    <section class="account-status-card" role="alert" aria-labelledby="access-denied-title">
+        <div class="account-status-icon" aria-hidden="true">!</div>
+
+        <p class="account-status-label">Obavještenje o pristupu</p>
+        <h1 id="access-denied-title">Pristup nije dozvoljen</h1>
+
+        <p class="account-status-message">
+            Vaš korisnički nalog nema potrebna ovlaštenja za pristup ovoj stranici.
+        </p>
+        <p class="account-status-help">
+            Možete se vratiti na početnu stranicu ili koristiti funkcionalnosti dostupne Vašoj ulozi.
+        </p>
+
+        <div class="account-status-actions">
+            <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                Nazad na početnu
+            </a>
+        </div>
+    </section>
+</div>

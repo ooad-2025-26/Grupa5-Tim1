@@ -20,10 +20,11 @@ namespace bibliotecha.Models.ViewModels
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Uloga je obavezna.")]
+        [Range(
+    (int)Uloga.Bibliotekar,
+    (int)Uloga.Administrator,
+    ErrorMessage = "Moguće je odabrati samo bibliotekarsku ili administratorsku ulogu.")]
         public Uloga Uloga { get; set; }
-
-        [Range(1, int.MaxValue, ErrorMessage = "Broj članske kartice mora biti pozitivan broj.")]
-        public int? BrojClanskeKartice { get; set; }
 
         [DataType(DataType.Date)]
         public DateOnly? DatumZaposlenja { get; set; }

@@ -1,5 +1,6 @@
 ﻿@model bibliotecha.Models.Knjiga
-@{    ViewData["Title"] = Model.Naslov;
+@{
+    ViewData["Title"] = Model.Naslov;
     var korica = string.IsNullOrWhiteSpace(Model.KoricaKnjige)
         ? Url.Content("~/images/book-placeholder.svg")
         : Model.KoricaKnjige;
@@ -8,24 +9,34 @@
 <section class="book-details">
     <div class="book-details__left">
         <img class="book-details__cover" src="@korica" alt="Korica knjige @Model.Naslov" />
-        <form asp-controller="Posudba"
-              asp-action="Posudi"
-              method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="knjigaId" value="@Model.IdKnjige" />
-            <button type="submit" class="book-details__button">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form asp-controller="Posudba"
+                  asp-action="Posudi"
+                  method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="knjigaId" value="@Model.IdKnjige" />
+                <button type="submit" class="book-details__button">
+                    Posudi
+                </button>
+            </form>
+        }
+        else
+        {
+            <a class="book-details__button"
+               asp-area="Identity"
+               asp-page="/Account/Login"
+               asp-route-returnUrl="@Url.Action("Details", "Knjiga", new { id = Model.IdKnjige })">
                 Posudi
-            </button>
-        </form>
+            </a>
+        }
         @if (ViewData["ImaAktivnuPosudbu"] as bool? == true)
         {
             <form asp-controller="Posudba"
                   asp-action="Produzi"
                   method="post">
                 @Html.AntiForgeryToken()
-
                 <input type="hidden" name="knjigaId" value="@Model.IdKnjige" />
-
                 <button type="submit" class="book-details__button">
                     Produži posudbu
                 </button>

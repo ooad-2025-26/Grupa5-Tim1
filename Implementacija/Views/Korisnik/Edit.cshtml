@@ -1,54 +1,61 @@
 ﻿@model bibliotecha.Models.ViewModels.UrediKorisnikaViewModel
 
 @{
-    ViewData["Title"] = "Uredi korisnika";
+    ViewData["Title"] = "Uredi zaposlenika";
 }
 
-<h1>Uredi korisnički nalog</h1>
+<div class="book-form-header book-form-header--compact">
+    <div>
+        <h1>Uredi zaposlenički nalog</h1>
+        <p>Ažurirajte podatke i ulogu bibliotekara ili administratora.</p>
+    </div>
+</div>
 
-<div class="row">
-    <div class="col-md-7 col-lg-6">
-        <form asp-action="Edit">
-            <input type="hidden" asp-for="Id" />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label asp-for="Ime" class="form-label"></label>
-                    <input asp-for="Ime" class="form-control" />
-                    <span asp-validation-for="Ime" class="text-danger"></span>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label asp-for="Prezime" class="form-label"></label>
-                    <input asp-for="Prezime" class="form-control" />
-                    <span asp-validation-for="Prezime" class="text-danger"></span>
-                </div>
+<div class="book-form-card book-form-card--compact">
+    <form asp-action="Edit">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="book-form-grid">
+            <div class="form-group">
+                <label asp-for="Ime" class="form-label">Ime</label>
+                <input asp-for="Ime" class="form-control" autocomplete="given-name" />
+                <span asp-validation-for="Ime" class="text-danger"></span>
             </div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
+
+            <div class="form-group">
+                <label asp-for="Prezime" class="form-label">Prezime</label>
+                <input asp-for="Prezime" class="form-control" autocomplete="family-name" />
+                <span asp-validation-for="Prezime" class="text-danger"></span>
+            </div>
+
+            <div class="form-group book-form-grid__full">
+                <label asp-for="Email" class="form-label">Email adresa</label>
+                <input asp-for="Email" class="form-control" autocomplete="email" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label asp-for="Uloga" class="form-label"></label>
-                    <select asp-for="Uloga" class="form-select" asp-items="Html.GetEnumSelectList<Uloga>()"></select>
-                    <span asp-validation-for="Uloga" class="text-danger"></span>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label asp-for="BrojClanskeKartice" class="form-label">Broj članske kartice</label>
-                    <input asp-for="BrojClanskeKartice" class="form-control" />
-                    <span asp-validation-for="BrojClanskeKartice" class="text-danger"></span>
-                </div>
+
+            <div class="form-group">
+                <label asp-for="Uloga" class="form-label">Uloga zaposlenika</label>
+                <select asp-for="Uloga" class="form-select">
+                    <option value="@((int)Uloga.Bibliotekar)">Bibliotekar</option>
+                    <option value="@((int)Uloga.Administrator)">Administrator</option>
+                </select>
+                <span asp-validation-for="Uloga" class="text-danger"></span>
             </div>
-            <div class="mb-3">
+
+            <div class="form-group">
                 <label asp-for="DatumZaposlenja" class="form-label">Datum zaposlenja</label>
                 <input asp-for="DatumZaposlenja" class="form-control" />
                 <span asp-validation-for="DatumZaposlenja" class="text-danger"></span>
             </div>
+        </div>
+
+        <div class="book-form-actions">
             <button type="submit" class="btn btn-primary">Sačuvaj izmjene</button>
-            <a asp-action="Index" class="btn btn-link">Odustani</a>
-        </form>
-    </div>
+            <a asp-action="Index" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {

@@ -11,6 +11,8 @@
 
     <form id="account" method="post">
 
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+
         <div asp-validation-summary="ModelOnly"
              class="text-danger">
         </div>
@@ -51,7 +53,7 @@
 
         <div class="auth-footer">
             Nemate račun?
-            <a asp-page="./Register">
+            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">
                 Registrujte se
             </a>
         </div>

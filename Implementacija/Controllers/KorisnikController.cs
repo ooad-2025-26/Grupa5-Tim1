@@ -150,7 +150,6 @@ namespace bibliotecha.Controllers
                 Prezime = korisnik.Prezime,
                 Email = korisnik.Email ?? string.Empty,
                 Uloga = korisnik.Uloga,
-                BrojClanskeKartice = korisnik.BrojClanskeKartice,
                 DatumZaposlenja = korisnik.DatumZaposlenja
             });
         }
@@ -159,6 +158,13 @@ namespace bibliotecha.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UrediKorisnikaViewModel model)
         {
+            if (model.Uloga == Uloga.User)
+            {
+                ModelState.AddModelError(
+                    nameof(model.Uloga),
+                    "Zaposlenički nalog nije moguće promijeniti u obični korisnički nalog.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -179,11 +185,9 @@ namespace bibliotecha.Controllers
 
             korisnik.Ime = model.Ime.Trim();
             korisnik.Prezime = model.Prezime.Trim();
-            korisnik.BrojClanskeKartice = model.BrojClanskeKartice;
             korisnik.Uloga = model.Uloga;
-            korisnik.DatumZaposlenja = model.Uloga is Uloga.Bibliotekar or Uloga.Administrator
-                ? model.DatumZaposlenja ?? DateOnly.FromDateTime(DateTime.Today)
-                : null;
+            korisnik.DatumZaposlenja =
+    model.DatumZaposlenja ?? DateOnly.FromDateTime(DateTime.Today);
 
             if (!string.Equals(korisnik.Email, model.Email, StringComparison.OrdinalIgnoreCase))
             {

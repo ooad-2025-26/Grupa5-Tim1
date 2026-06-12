@@ -210,7 +210,8 @@ namespace bibliotecha.Controllers
                 .AnyAsync(r =>
                     r.KnjigaId == knjigaId &&
                     r.KorisnikId == korisnik.Id &&
-                    r.Status == StatusRezervacije.Aktivna);
+                    (r.Status == StatusRezervacije.Aktivna ||
+                    r.Status == StatusRezervacije.spremnaZaPreuzimanje));
 
             if (vecPostojiRezervacija)
             {

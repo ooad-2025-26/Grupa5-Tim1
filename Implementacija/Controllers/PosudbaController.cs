@@ -9,6 +9,8 @@ using bibliotecha.Data;
 using bibliotecha.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using bibliotecha.Services;
+using Microsoft.Extensions.Options;
 
 namespace bibliotecha.Controllers
 {
@@ -16,12 +18,16 @@ namespace bibliotecha.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<Korisnik> _userManager;
+        private readonly NotificationSettings _notificationSettings;
 
-        public PosudbaController(ApplicationDbContext context,
-                                 UserManager<Korisnik> userManager)
+        public PosudbaController(
+            ApplicationDbContext context,
+            UserManager<Korisnik> userManager,
+            IOptions<NotificationSettings> notificationSettings)
         {
             _context = context;
             _userManager = userManager;
+            _notificationSettings = notificationSettings.Value;
         }
 
         // GET: Posudba
@@ -89,18 +95,23 @@ namespace bibliotecha.Controllers
                 "Naziv");
 
             ViewData["PrimjerakId"] = new SelectList(
-                _context.Primjerak
-                    .Include(p => p.Knjiga)
-                    .Where(p => p.Status == StatusPrimjerka.Dostupan)
-                    .Select(p => new
-                    {
-                        p.IdPrimjerka,
-                        Naziv = "#" + p.IdPrimjerka +
-                                 " - " +
-                                 p.Knjiga.Naslov
-                    }),
-                "IdPrimjerka",
-                "Naziv");
+    _context.Primjerak
+        .Include(p => p.Knjiga)
+        .Where(p =>
+            p.Status == StatusPrimjerka.Dostupan ||
+            p.Status == StatusPrimjerka.Rezervisan)
+        .Select(p => new
+        {
+            p.IdPrimjerka,
+            Naziv = "#" + p.IdPrimjerka +
+                    " - " +
+                    p.Knjiga.Naslov +
+                    (p.Status == StatusPrimjerka.Rezervisan
+                        ? " (rezervisan)"
+                        : "")
+        }),
+    "IdPrimjerka",
+    "Naziv");
 
             return View();
         }
@@ -122,20 +133,46 @@ namespace bibliotecha.Controllers
             {
                 ModelState.AddModelError("", "Odabrani primjerak ne postoji.");
             }
-            else if (primjerak.Status != StatusPrimjerka.Dostupan)
+
+            Rezervacija? spremnaRezervacija = null;
+
+            if (primjerak?.Status == StatusPrimjerka.Rezervisan)
+            {
+                spremnaRezervacija = await _context.Rezervacija
+                    .FirstOrDefaultAsync(r =>
+                        r.KnjigaId == primjerak.KnjigaId &&
+                        r.KorisnikId == posudba.KorisnikId &&
+                        r.Status == StatusRezervacije.spremnaZaPreuzimanje);
+
+                if (spremnaRezervacija == null)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        "Rezervisani primjerak može preuzeti samo korisnik kojem je dodijeljen.");
+                }
+            }
+            else if (primjerak?.Status != StatusPrimjerka.Dostupan)
             {
                 ModelState.AddModelError("", "Primjerak nije dostupan za posudbu.");
             }
 
             if (ModelState.IsValid)
             {
-                posudba.DatumOnlinePosudbe = DateOnly.FromDateTime(DateTime.Now);
-                posudba.DatumPreuzimanja = DateOnly.FromDateTime(DateTime.Now);
+                var danas = DateOnly.FromDateTime(DateTime.Today);
+
+                posudba.DatumOnlinePosudbe = danas;
+                posudba.DatumPreuzimanja = danas;
+                posudba.RokVracanja =
+                    danas.AddDays(_notificationSettings.LoanDurationDays);
 
                 posudba.Status = StatusPosudbe.Aktivna;
                 posudba.BrojProduzenja = 0;
 
                 primjerak!.Status = StatusPrimjerka.Posudjen;
+                if (spremnaRezervacija != null)
+                {
+                    spremnaRezervacija.Status = StatusRezervacije.Ispunjena;
+                }
 
                 _context.Posudba.Add(posudba);
 
@@ -147,8 +184,10 @@ namespace bibliotecha.Controllers
             }
 
             ViewBag.PrimjerakId = new SelectList(
-                _context.Primjerak
-                    .Where(p => p.Status == StatusPrimjerka.Dostupan),
+    _context.Primjerak
+        .Where(p =>
+            p.Status == StatusPrimjerka.Dostupan ||
+            p.Status == StatusPrimjerka.Rezervisan),
                 "IdPrimjerka",
                 "IdPrimjerka",
                 posudba.PrimjerakId);
@@ -285,7 +324,7 @@ namespace bibliotecha.Controllers
                 KorisnikId = korisnik.Id,
                 DatumOnlinePosudbe = danas,
                 DatumPreuzimanja = null,
-                RokVracanja = danas.AddDays(14),
+                RokVracanja = danas.AddDays(_notificationSettings.LoanDurationDays),
                 Status = StatusPosudbe.Online,
                 BrojProduzenja = 0
             };
@@ -335,7 +374,8 @@ namespace bibliotecha.Controllers
             bool postojiAktivnaRezervacija = await _context.Rezervacija
                 .AnyAsync(r =>
                     r.KnjigaId == knjigaId &&
-                    r.Status == StatusRezervacije.Aktivna);
+                    (r.Status == StatusRezervacije.Aktivna ||
+                    r.Status == StatusRezervacije.spremnaZaPreuzimanje));
 
             if (postojiAktivnaRezervacija)
             {
@@ -370,7 +410,11 @@ namespace bibliotecha.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            posudba.DatumPreuzimanja = DateOnly.FromDateTime(DateTime.Now);
+            posudba.DatumPreuzimanja = DateOnly.FromDateTime(DateTime.Today);
+
+            posudba.RokVracanja = posudba.DatumPreuzimanja.Value
+                .AddDays(_notificationSettings.LoanDurationDays);
+
             posudba.Status = StatusPosudbe.Aktivna;
 
             await _context.SaveChangesAsync();
