@@ -111,7 +111,7 @@
                     </a>
                 }
 
-                @if (posudba.Status != StatusPosudbe.Zavrsena)
+                @if (posudba.Status == StatusPosudbe.Aktivna || posudba.Status == StatusPosudbe.Produzena)
                 {
                     <a asp-action="Vrati"
                        asp-route-id="@posudba.IdPosudbe"
