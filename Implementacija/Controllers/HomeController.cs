@@ -39,44 +39,45 @@ namespace bibliotecha.Controllers
 
         public async Task<IActionResult> Trazi(string? q, Zanr? zanr, Jezik? jezik, int? godinaOd, int? godinaDo, SortiranjePo sortiranje = SortiranjePo.Naslov)
         {
-            var query = _context.Knjiga
+            var sveKnjige = await _context.Knjiga
                 .Include(k => k.Autor)
-                .AsQueryable();
+                .ToListAsync();
 
-            if (!string.IsNullOrWhiteSpace(q))
+            var rezultati = new List<Knjiga>();
+
+            foreach (var knjiga in sveKnjige)
             {
-                var upit = q.ToLower();
+                bool odgovara = true;
 
-                query = query.Where(k =>
-                    k.Naslov.ToLower().Contains(upit) ||
-                    k.Autor.Ime.ToLower().Contains(upit) ||
-                    k.Autor.Prezime.ToLower().Contains(upit) ||
-                    (k.Autor.Ime + " " + k.Autor.Prezime).ToLower().Contains(upit));
+                if (!string.IsNullOrWhiteSpace(q))
+                {
+                    string upit = q.ToLower();
+
+                    bool naslovOdgovara = knjiga.Naslov.ToLower().Contains(upit);
+                    bool autorOdgovara = (knjiga.Autor.Ime + " " + knjiga.Autor.Prezime)
+                        .ToLower()
+                        .Contains(upit);
+
+                    odgovara = naslovOdgovara || autorOdgovara;
+                }
+
+                if (odgovara && zanr.HasValue && knjiga.Zanr != zanr.Value)
+                    odgovara = false;
+
+                if (odgovara && jezik.HasValue && knjiga.Jezik != jezik.Value)
+                    odgovara = false;
+
+                if (odgovara && godinaOd.HasValue && knjiga.DatumIzdavanja.Year < godinaOd.Value)
+                    odgovara = false;
+
+                if (odgovara && godinaDo.HasValue && knjiga.DatumIzdavanja.Year > godinaDo.Value)
+                    odgovara = false;
+
+                if (odgovara)
+                    rezultati.Add(knjiga);
             }
 
-            if (zanr.HasValue)
-                query = query.Where(k => k.Zanr == zanr.Value);
-
-            if (jezik.HasValue)
-                query = query.Where(k => k.Jezik == jezik.Value);
-
-            if (godinaOd.HasValue)
-                query = query.Where(k => k.DatumIzdavanja.Year >= godinaOd.Value);
-
-            if (godinaDo.HasValue)
-                query = query.Where(k => k.DatumIzdavanja.Year <= godinaDo.Value);
-
-            query = sortiranje switch
-            {
-                SortiranjePo.Naslov => query.OrderBy(k => k.Naslov),
-                SortiranjePo.NajnovijeIzdanje => query.OrderByDescending(k => k.DatumIzdavanja),
-                SortiranjePo.NajstarijeIzdanje => query.OrderBy(k => k.DatumIzdavanja),
-                SortiranjePo.Autor => query.OrderBy(k => k.Autor.Prezime).ThenBy(k => k.Autor.Ime),
-                SortiranjePo.Ocjena => query.OrderByDescending(k => k.ProsjecnaOcjena).ThenBy(k => k.Naslov),
-                _ => query.OrderBy(k => k.Naslov)
-            };
-
-            var rezultati = await query.ToListAsync();
+            rezultati = SortirajKnjige(rezultati, sortiranje);
 
             var vm = new TraziViewModel
             {
@@ -90,6 +91,50 @@ namespace bibliotecha.Controllers
             };
 
             return View(vm);
+        }
+
+        private static List<Knjiga> SortirajKnjige(List<Knjiga> knjige, SortiranjePo sortiranje)
+        {
+            for (int i = 0; i < knjige.Count - 1; i++)
+            {
+                for (int j = i + 1; j < knjige.Count; j++)
+                {
+                    if (TrebaZamijeniti(knjige[i], knjige[j], sortiranje))
+                    {
+                        var temp = knjige[i];
+                        knjige[i] = knjige[j];
+                        knjige[j] = temp;
+                    }
+                }
+            }
+
+            return knjige;
+        }
+
+        private static bool TrebaZamijeniti(Knjiga prva, Knjiga druga, SortiranjePo sortiranje)
+        {
+            return sortiranje switch
+            {
+                SortiranjePo.Naslov =>
+                    string.Compare(prva.Naslov, druga.Naslov, StringComparison.OrdinalIgnoreCase) > 0,
+
+                SortiranjePo.Ocjena =>
+                    prva.ProsjecnaOcjena < druga.ProsjecnaOcjena,
+
+                SortiranjePo.NajnovijeIzdanje =>
+                    prva.DatumIzdavanja < druga.DatumIzdavanja,
+
+                SortiranjePo.NajstarijeIzdanje =>
+                    prva.DatumIzdavanja > druga.DatumIzdavanja,
+
+                SortiranjePo.Autor =>
+                    string.Compare(
+                        prva.Autor.Prezime + prva.Autor.Ime,
+                        druga.Autor.Prezime + druga.Autor.Ime,
+                        StringComparison.OrdinalIgnoreCase) > 0,
+
+                _ => false
+            };
         }
 
         public IActionResult Privacy()

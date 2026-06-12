@@ -157,12 +157,17 @@
                             Pregled
                         </a>
 
-                        <a asp-controller="Posudba"
-                           asp-action="Create"
-                           asp-route-id="@knjiga.IdKnjige"
-                           class="search-book-button">
-                            Posudi
-                        </a>
+                        <form asp-controller="Posudba"
+                              asp-action="Posudi"
+                              method="post">
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden" name="knjigaId" value="@knjiga.IdKnjige" />
+
+                            <button type="submit" class="search-book-button">
+                                Posudi
+                            </button>
+                        </form>
 
                     </div>
 

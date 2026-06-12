@@ -493,6 +493,8 @@ a {
     justify-content: center;
     text-decoration: none;
     width: 112px;
+    border: none;
+    outline: none;
 }
 
     .search-book-button:hover,
