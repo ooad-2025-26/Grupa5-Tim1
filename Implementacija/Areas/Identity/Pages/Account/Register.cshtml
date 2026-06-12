@@ -13,9 +13,35 @@
           asp-route-returnUrl="@Model.ReturnUrl"
           method="post">
 
-        <div asp-validation-summary="ModelOnly"
-             class="text-danger">
+        <div class="text-danger">
+
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(x => x.Errors))
+            {
+                var poruka = error.ErrorMessage;
+
+                if (poruka.Contains("Passwords must have at least one non alphanumeric character."))
+                {
+                    poruka = "Lozinka mora imati najmanje jedan specijalni znak.";
+                }
+
+                if (poruka.Contains("Passwords must have at least one digit"))
+                {
+                    poruka = "Lozinka mora imati najmanje jednu cifru (0-9).";
+                }
+
+                if (poruka.Contains("Passwords must have at least one uppercase"))
+                {
+                    poruka = "Lozinka mora imati najmanje jedno veliko slovo (A-Z).";
+                }
+
+                <div>
+                    @poruka
+                </div>
+            }
+
         </div>
+
+
 
         <div class="auth-row">
 
