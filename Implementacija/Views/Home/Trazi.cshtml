@@ -168,17 +168,29 @@
                         }
                         else
                         {
-                            <form asp-controller="Posudba"
-                                  asp-action="Posudi"
-                                  method="post">
-                                @Html.AntiForgeryToken()
+                            @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+                            {
+                                <a asp-controller="Knjiga"
+                                   asp-action="Edit"
+                                   asp-route-id="@knjiga.IdKnjige"
+                                   class="search-book-button">
+                                    Uredi
+                                </a>
+                            }
+                            else
+                            {
+                                <form asp-controller="Posudba"
+                                      asp-action="Posudi"
+                                      method="post">
+                                    @Html.AntiForgeryToken()
 
-                                <input type="hidden" name="knjigaId" value="@knjiga.IdKnjige" />
+                                    <input type="hidden" name="knjigaId" value="@knjiga.IdKnjige" />
 
-                                <button type="submit" class="search-book-button">
-                                    Posudi
-                                </button>
-                            </form>
+                                    <button type="submit" class="search-book-button">
+                                        Posudi
+                                    </button>
+                                </form>
+                            }
                         }
 
                     </div>
