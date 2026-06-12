@@ -1,59 +1,104 @@
 ﻿@model IEnumerable<bibliotecha.Models.Rezervacija>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Evidencija rezervacija";
 }
 
-<h1>Index</h1>
+<div class="management-header">
+    <div>
+        <h1>Evidencija rezervacija</h1>
+        <p>Pregled svih rezervacija knjiga.</p>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Knjiga)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Korisnik)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DatumRezervacije)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PozicijaURedu)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Knjiga.IdKnjige)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Korisnik.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DatumRezervacije)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PozicijaURedu)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdRezervacije">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdRezervacije">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdRezervacije">Delete</a>
-            </td>
-        </tr>
+    <div class="management-actions">
+        <a asp-controller="Posudba"
+           asp-action="Index"
+           class="btn btn-outline-primary">
+            Evidencija posudbi
+        </a>
+    </div>
+</div>
+
+<form asp-action="Index"
+      method="get"
+      class="management-search">
+
+    <input type="text"
+           name="q"
+           value="@ViewData["Upit"]"
+           placeholder="Pretraži po naslovu, autoru, ISBN-u ili korisniku..."
+           autocomplete="off" />
+
+    <button type="submit"
+            class="btn btn-primary">
+        Pretraži
+    </button>
+
+    @if (!string.IsNullOrWhiteSpace(ViewData["Upit"]?.ToString()))
+    {
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            Očisti
+        </a>
+    }
+</form>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Nema rezervacija.
+    </div>
 }
-    </tbody>
-</table>
+
+@foreach (var rezervacija in Model)
+{
+    <section class="management-card">
+
+        <div class="catalog-summary">
+
+            <div>
+                <h2>@rezervacija.Knjiga.Naslov</h2>
+
+                <p>
+                    @rezervacija.Knjiga.Autor.Ime
+                    @rezervacija.Knjiga.Autor.Prezime
+                </p>
+
+                <small>
+                    ISBN: @rezervacija.Knjiga.ISBN |
+                    @rezervacija.Knjiga.Zanr
+                </small>
+            </div>
+
+            <div class="management-badges">
+
+                <span>
+                    <strong>Korisnik:</strong>
+                    @rezervacija.Korisnik.Ime
+                    @rezervacija.Korisnik.Prezime
+                </span>
+
+                <span>
+                    <strong>Pozicija:</strong>
+                    @rezervacija.PozicijaURedu
+                </span>
+
+                <span>
+                    <strong>Status:</strong>
+                    @rezervacija.Status
+                </span>
+
+            </div>
+
+            <div class="management-actions">
+                <a asp-action="Details"
+                   asp-route-id="@rezervacija.IdRezervacije"
+                   class="btn btn-sm btn-outline-secondary">
+                    Detalji
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+}

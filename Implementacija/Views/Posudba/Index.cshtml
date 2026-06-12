@@ -1,71 +1,133 @@
 ﻿@model IEnumerable<bibliotecha.Models.Posudba>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Evidencija posudbi";
 }
 
-<h1>Index</h1>
+<div class="management-header">
+    <div>
+        <h1>Evidencija posudbi</h1>
+        <p>Pregled svih aktivnih i završenih posudbi.</p>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Primjerak)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Korisnik)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DatumOnlinePosudbe)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DatumPreuzimanja)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RokVracanja)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.BrojProduzenja)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Primjerak.IdPrimjerka)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Korisnik.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DatumOnlinePosudbe)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DatumPreuzimanja)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RokVracanja)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BrojProduzenja)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdPosudbe">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdPosudbe">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdPosudbe">Delete</a>
-            </td>
-        </tr>
+    <div class="management-actions">
+        <a asp-action="Create"
+           class="btn btn-primary">
+            Dodaj novu posudbu
+        </a>
+
+        <a asp-controller="Rezervacijas"
+           asp-action="Index"
+           class="btn btn-outline-primary">
+            Evidencija rezervacija
+        </a>
+    </div>
+</div>
+
+<form asp-action="Index"
+      method="get"
+      class="management-search">
+
+    <input type="text"
+           name="q"
+           value="@ViewData["Upit"]"
+           placeholder="Pretraži po naslovu, autoru, ISBN-u ili korisniku..."
+           autocomplete="off" />
+
+    <button type="submit"
+            class="btn btn-primary">
+        Pretraži
+    </button>
+
+    @if (!string.IsNullOrWhiteSpace(ViewData["Upit"]?.ToString()))
+    {
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            Očisti
+        </a>
+    }
+</form>
+
+@if (TempData["Poruka"] is string poruka)
+{
+    <div class="alert alert-success">
+        @poruka
+    </div>
 }
-    </tbody>
-</table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Nema evidentiranih posudbi.
+    </div>
+}
+
+@foreach (var posudba in Model)
+{
+    <section class="management-card">
+
+        <div class="catalog-summary">
+
+            <div>
+                <h2>@posudba.Primjerak.Knjiga.Naslov</h2>
+
+                <p>
+                    @posudba.Primjerak.Knjiga.Autor.Ime
+                    @posudba.Primjerak.Knjiga.Autor.Prezime
+                </p>
+
+                <small>
+                    ISBN: @posudba.Primjerak.Knjiga.ISBN |
+                    @posudba.Primjerak.Knjiga.Zanr
+                </small>
+            </div>
+
+            <div class="management-badges">
+                <span>
+                    <strong>Primjerak:</strong>
+                    #@posudba.PrimjerakId
+                </span>
+
+                <span>
+                    <strong>Korisnik:</strong>
+                    @posudba.Korisnik.Ime
+                    @posudba.Korisnik.Prezime
+                </span>
+
+                <span>
+                    <strong>Status:</strong>
+                    @posudba.Status
+                </span>
+            </div>
+
+            <div class="management-actions">
+
+                @if (posudba.Status == StatusPosudbe.Online)
+                {
+                    <a asp-action="Preuzmi"
+                       asp-route-id="@posudba.IdPosudbe"
+                       class="btn btn-sm btn-success">
+                        Preuzmi
+                    </a>
+                }
+
+                @if (posudba.Status != StatusPosudbe.Zavrsena)
+                {
+                    <a asp-action="Vrati"
+                       asp-route-id="@posudba.IdPosudbe"
+                       class="btn btn-sm btn-warning">
+                        Vrati
+                    </a>
+                }
+
+                <a asp-action="Details"
+                   asp-route-id="@posudba.IdPosudbe"
+                   class="btn btn-sm btn-outline-secondary">
+                    Detalji
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+}

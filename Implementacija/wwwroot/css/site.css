@@ -841,7 +841,15 @@ a {
         margin: 0;
     }
 
-.management-actions,
+.management-actions .btn {
+    border-radius: 6px;
+    min-height: 38px;
+    padding: 0.45rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .management-badges {
     display: flex;
     flex-wrap: wrap;
@@ -938,10 +946,14 @@ a {
     color: #275f35;
 }
 
-.status-badge--posudjen,
-.status-badge--rezervisan {
+.status-badge--posudjen {
     background: #f7e3bf;
     color: #78551a;
+}
+
+.status-badge--rezervisan {
+    background: #dce8ff;
+    color: #2d5da8;
 }
 
 .status-badge--izgubljen,
@@ -1059,3 +1071,34 @@ a {
         grid-column: auto;
     }
 }
+
+/* ── Password ──────────────────────────────────────────── */
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+    .password-wrapper .auth-input {
+        padding-right: 45px;
+    }
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #9a9a9a;
+    padding: 0;
+}
+
+    .password-toggle i {
+        font-size: 1.1rem;
+    }
+
+    .password-toggle:focus {
+        outline: none;
+    }

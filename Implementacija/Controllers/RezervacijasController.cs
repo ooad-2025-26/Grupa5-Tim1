@@ -24,10 +24,30 @@ namespace bibliotecha.Controllers
         }
 
         // GET: Rezervacijas
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? q)
         {
-            var applicationDbContext = _context.Rezervacija.Include(r => r.Knjiga).Include(r => r.Korisnik);
-            return View(await applicationDbContext.ToListAsync());
+            var rezervacije = _context.Rezervacija
+                .Include(r => r.Knjiga)
+                    .ThenInclude(k => k.Autor)
+                .Include(r => r.Korisnik)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.ToLower();
+
+                rezervacije = rezervacije.Where(r =>
+                    r.Knjiga.Naslov.ToLower().Contains(q) ||
+                    r.Knjiga.ISBN.ToLower().Contains(q) ||
+                    r.Knjiga.Autor.Ime.ToLower().Contains(q) ||
+                    r.Knjiga.Autor.Prezime.ToLower().Contains(q) ||
+                    r.Korisnik.Ime.ToLower().Contains(q) ||
+                    r.Korisnik.Prezime.ToLower().Contains(q));
+            }
+
+            ViewData["Upit"] = q;
+
+            return View(await rezervacije.ToListAsync());
         }
 
         // GET: Rezervacijas/Details/5

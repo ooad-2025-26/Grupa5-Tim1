@@ -26,11 +26,21 @@
 
         <div class="auth-field">
             <label asp-for="Input.Password"></label>
-            <input asp-for="Input.Password"
-                   class="auth-input" />
+
+            <div class="password-wrapper">
+                <input asp-for="Input.Password"
+                       class="auth-input"
+                       id="passwordInput" />
+
+                <button type="button"
+                        class="password-toggle"
+                        onclick="togglePassword('passwordInput', this)">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+
             <span asp-validation-for="Input.Password"
-                  class="text-danger">
-            </span>
+                  class="text-danger"></span>
         </div>
 
         <button id="login-submit"
@@ -52,4 +62,23 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function togglePassword(id, button) {
+
+            const input = document.getElementById(id);
+            const icon = button.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            }
+            else {
+                input.type = "password";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            }
+        }
+    </script>
 }

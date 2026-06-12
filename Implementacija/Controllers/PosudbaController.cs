@@ -25,10 +25,31 @@ namespace bibliotecha.Controllers
         }
 
         // GET: Posudba
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? q)
         {
-            var applicationDbContext = _context.Posudba.Include(p => p.Korisnik).Include(p => p.Primjerak);
-            return View(await applicationDbContext.ToListAsync());
+            var posudbe = _context.Posudba
+                .Include(p => p.Korisnik)
+                .Include(p => p.Primjerak)
+                    .ThenInclude(pr => pr.Knjiga)
+                        .ThenInclude(k => k.Autor)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.ToLower();
+
+                posudbe = posudbe.Where(p =>
+                    p.Primjerak.Knjiga.Naslov.ToLower().Contains(q) ||
+                    p.Primjerak.Knjiga.ISBN.ToLower().Contains(q) ||
+                    p.Primjerak.Knjiga.Autor.Ime.ToLower().Contains(q) ||
+                    p.Primjerak.Knjiga.Autor.Prezime.ToLower().Contains(q) ||
+                    p.Korisnik.Ime.ToLower().Contains(q) ||
+                    p.Korisnik.Prezime.ToLower().Contains(q));
+            }
+
+            ViewData["Upit"] = q;
+
+            return View(await posudbe.ToListAsync());
         }
 
         // GET: Posudba/Details/5
@@ -42,6 +63,7 @@ namespace bibliotecha.Controllers
             var posudba = await _context.Posudba
                 .Include(p => p.Korisnik)
                 .Include(p => p.Primjerak)
+                      .ThenInclude(pr => pr.Knjiga)
                 .FirstOrDefaultAsync(m => m.IdPosudbe == id);
             if (posudba == null)
             {
@@ -54,8 +76,32 @@ namespace bibliotecha.Controllers
         // GET: Posudba/Create
         public IActionResult Create()
         {
-            ViewData["KorisnikId"] = new SelectList(_context.Korisnik, "IdKorisnika", "IdKorisnika");
-            ViewData["PrimjerakId"] = new SelectList(_context.Primjerak, "IdPrimjerka", "IdPrimjerka");
+            ViewData["KorisnikId"] = new SelectList(
+                _context.Korisnik
+                    .OrderBy(k => k.Prezime)
+                    .Select(k => new
+                    {
+                        k.Id,
+                        Naziv = k.Ime + " " + k.Prezime +
+                                 " (Kartica: " + k.BrojClanskeKartice + ")"
+                    }),
+                "Id",
+                "Naziv");
+
+            ViewData["PrimjerakId"] = new SelectList(
+                _context.Primjerak
+                    .Include(p => p.Knjiga)
+                    .Where(p => p.Status == StatusPrimjerka.Dostupan)
+                    .Select(p => new
+                    {
+                        p.IdPrimjerka,
+                        Naziv = "#" + p.IdPrimjerka +
+                                 " - " +
+                                 p.Knjiga.Naslov
+                    }),
+                "IdPrimjerka",
+                "Naziv");
+
             return View();
         }
 
@@ -64,16 +110,56 @@ namespace bibliotecha.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdPosudbe,PrimjerakId,KorisnikId,DatumOnlinePosudbe,DatumPreuzimanja,RokVracanja,Status,BrojProduzenja")] Posudba posudba)
+        [Authorize(Roles = "Bibliotekar,Administrator")]
+        public async Task<IActionResult> Create(
+    [Bind("PrimjerakId,KorisnikId,RokVracanja")]
+    Posudba posudba)
         {
+            var primjerak = await _context.Primjerak
+                .FirstOrDefaultAsync(p => p.IdPrimjerka == posudba.PrimjerakId);
+
+            if (primjerak == null)
+            {
+                ModelState.AddModelError("", "Odabrani primjerak ne postoji.");
+            }
+            else if (primjerak.Status != StatusPrimjerka.Dostupan)
+            {
+                ModelState.AddModelError("", "Primjerak nije dostupan za posudbu.");
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(posudba);
+                posudba.DatumOnlinePosudbe = DateOnly.FromDateTime(DateTime.Now);
+                posudba.DatumPreuzimanja = DateOnly.FromDateTime(DateTime.Now);
+
+                posudba.Status = StatusPosudbe.Aktivna;
+                posudba.BrojProduzenja = 0;
+
+                primjerak!.Status = StatusPrimjerka.Posudjen;
+
+                _context.Posudba.Add(posudba);
+
                 await _context.SaveChangesAsync();
+
+                TempData["Poruka"] = "Nova posudba je uspješno evidentirana.";
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["KorisnikId"] = new SelectList(_context.Korisnik, "IdKorisnika", "IdKorisnika", posudba.KorisnikId);
-            ViewData["PrimjerakId"] = new SelectList(_context.Primjerak, "IdPrimjerka", "IdPrimjerka", posudba.PrimjerakId);
+
+            ViewBag.PrimjerakId = new SelectList(
+                _context.Primjerak
+                    .Where(p => p.Status == StatusPrimjerka.Dostupan),
+                "IdPrimjerka",
+                "IdPrimjerka",
+                posudba.PrimjerakId);
+
+            ViewBag.KorisnikId = new SelectList(
+                _context.Korisnik
+                    .OrderBy(k => k.Prezime),
+                "Id",
+                "Email",
+                posudba.KorisnikId);
+
             return View(posudba);
         }
 
@@ -266,6 +352,59 @@ namespace bibliotecha.Controllers
             TempData["Poruka"] = "Posudba je uspješno produžena.";
 
             return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
+        }
+
+        [Authorize(Roles = "Bibliotekar,Administrator")]
+        public async Task<IActionResult> Preuzmi(int id)
+        {
+            var posudba = await _context.Posudba
+                .Include(p => p.Primjerak)
+                .FirstOrDefaultAsync(p => p.IdPosudbe == id);
+
+            if (posudba == null)
+                return NotFound();
+
+            if (posudba.Status != StatusPosudbe.Online)
+            {
+                TempData["Poruka"] = "Posudba nije u statusu Online.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            posudba.DatumPreuzimanja = DateOnly.FromDateTime(DateTime.Now);
+            posudba.Status = StatusPosudbe.Aktivna;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Poruka"] = "Knjiga je preuzeta.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "Bibliotekar,Administrator")]
+        public async Task<IActionResult> Vrati(int id)
+        {
+            var posudba = await _context.Posudba
+                .Include(p => p.Primjerak)
+                .FirstOrDefaultAsync(p => p.IdPosudbe == id);
+
+            if (posudba == null)
+                return NotFound();
+
+            if (posudba.Status == StatusPosudbe.Zavrsena)
+            {
+                TempData["Poruka"] = "Posudba je već završena.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            posudba.Status = StatusPosudbe.Zavrsena;
+
+            posudba.Primjerak.Status = StatusPrimjerka.Dostupan;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Poruka"] = "Knjiga je vraćena.";
+
+            return RedirectToAction(nameof(Index));
         }
 
         private bool PosudbaExists(int id)
