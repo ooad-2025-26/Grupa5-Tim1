@@ -59,10 +59,14 @@ namespace bibliotecha.Models
         [DisplayName("Jezik")]
         public Jezik Jezik { get; set; }
 
-        [StringLength(500, ErrorMessage = "Link ili putanja do korice može imati najviše 500 karaktera.")]
+        [Required(ErrorMessage = "Link slike korice je obavezan.")]
+        [StringLength(
+    500,
+    ErrorMessage = "Link ili putanja do korice može imati najviše 500 karaktera.")]
         [DisplayName("Korica knjige")]
         public string KoricaKnjige { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Prosječna ocjena je obavezna.")]
         [Range(0, 5, ErrorMessage = "Prosječna ocjena mora biti između 0 i 5.")]
         [DisplayName("Prosječna ocjena")]
         public float ProsjecnaOcjena { get; set; }

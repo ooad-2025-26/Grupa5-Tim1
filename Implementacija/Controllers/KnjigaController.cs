@@ -34,11 +34,15 @@ namespace bibliotecha.Controllers
 
             if (!string.IsNullOrWhiteSpace(q))
             {
+                q = q.Trim();
+
                 query = query.Where(k =>
                     k.Naslov.Contains(q) ||
                     k.ISBN.Contains(q) ||
                     k.Autor.Ime.Contains(q) ||
-                    k.Autor.Prezime.Contains(q));
+                    k.Autor.Prezime.Contains(q) ||
+                    (k.Autor.Ime + " " + k.Autor.Prezime).Contains(q) ||
+                    (k.Autor.Prezime + " " + k.Autor.Ime).Contains(q));
             }
 
             ViewData["Upit"] = q;

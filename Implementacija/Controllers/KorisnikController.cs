@@ -23,9 +23,13 @@ namespace bibliotecha.Controllers
 
             if (!string.IsNullOrWhiteSpace(q))
             {
+                q = q.Trim();
+
                 query = query.Where(k =>
                     k.Ime.Contains(q) ||
                     k.Prezime.Contains(q) ||
+                    (k.Ime + " " + k.Prezime).Contains(q) ||
+                    (k.Prezime + " " + k.Ime).Contains(q) ||
                     (k.Email != null && k.Email.Contains(q)));
             }
 
