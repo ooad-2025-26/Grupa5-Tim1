@@ -20,13 +20,10 @@ Cilj sistema je da poveća efikasnost rada biblioteke, uštedi vrijeme i pobolj�
 
 ## Informacije o timu
 
-
-| Ime i prezime 
-|---|---|
-| Adna Braković
-| Amina Salkanović 
-| Halima Pezo 
-| Zuhra Ramčilović 
+- Adna Braković
+- Amina Salkanović 
+- Halima Pezo 
+- Zuhra Ramčilović 
 
 ---
 
