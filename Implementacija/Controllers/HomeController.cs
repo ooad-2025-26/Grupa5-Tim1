@@ -44,10 +44,15 @@ namespace bibliotecha.Controllers
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(q))
+            {
+                var upit = q.ToLower();
+
                 query = query.Where(k =>
-                    k.Naslov.Contains(q) ||
-                    k.Autor.Ime.Contains(q) ||
-                    k.Autor.Prezime.Contains(q));
+                    k.Naslov.ToLower().Contains(upit) ||
+                    k.Autor.Ime.ToLower().Contains(upit) ||
+                    k.Autor.Prezime.ToLower().Contains(upit) ||
+                    (k.Autor.Ime + " " + k.Autor.Prezime).ToLower().Contains(upit));
+            }
 
             if (zanr.HasValue)
                 query = query.Where(k => k.Zanr == zanr.Value);

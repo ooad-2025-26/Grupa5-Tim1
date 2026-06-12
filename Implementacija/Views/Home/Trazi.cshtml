@@ -7,13 +7,32 @@
 <section class="search-section">
     <form asp-controller="Home" asp-action="Trazi" method="get" class="search-form">
         <div class="search-form__main">
+
             <input type="text"
                    name="q"
                    class="search-form__input"
                    placeholder="Pretraži knjige, autore..."
                    value="@Model.Upit"
                    autocomplete="off" />
-            <button type="submit" class="search-form__button">Pretraži</button>
+
+            <button type="submit" class="search-form__button">
+                Pretraži
+            </button>
+
+
+            @if (!string.IsNullOrWhiteSpace(Model.Upit) ||
+                 Model.Zanr.HasValue ||
+                 Model.Jezik.HasValue ||
+                 Model.GodinaOd.HasValue ||
+                 Model.GodinaDo.HasValue)
+            {
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="search-form__clear">
+                    Očisti
+                </a>
+            }
+
         </div>
         <div class="search-form__filters">
             <select name="zanr" class="search-form__select">
@@ -54,15 +73,18 @@
 </section>
 
 <section class="search-results">
-    <div class="search-results__header">
-        <h2>
-            <span>
-                @(Model.Rezultati.Count == 1
-                    ? "1 rezultat"
-                    : $"{Model.Rezultati.Count} rezultata")
-            </span>
-        </h2>
-    </div>
+    @if (Model.Rezultati.Any())
+    {
+        <div class="search-results__header">
+            <h2>
+                <span>
+                    @(Model.Rezultati.Count == 1
+                        ? "1 rezultat"
+                        : $"{Model.Rezultati.Count} rezultata")
+                </span>
+            </h2>
+        </div>
+    }
 
     @if (Model.Rezultati.Any())
     {
@@ -150,6 +172,8 @@
     }
     else
     {
-        <p class="search-results__empty">Nema knjiga koje odgovaraju zadanim kriterijima.</p>
+        <p class="search-results__empty">
+            Nema knjiga koje odgovaraju pretrazi.
+        </p>
     }
 </section>
