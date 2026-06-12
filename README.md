@@ -1,4 +1,5 @@
-# Bibliotecha - Online sistem za upravljanje bibliotekom
+# <img width="497" height="155" alt="image" src="https://github.com/user-attachments/assets/eb0df7e0-88f9-4032-8746-0f4f9880e78e" />
+- Online sistem za upravljanje bibliotekom
 
 ## O projektu
 
