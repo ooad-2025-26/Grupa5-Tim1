@@ -20,17 +20,13 @@ Cilj sistema je da poveća efikasnost rada biblioteke, uštedi vrijeme i pobolj�
 
 ## Informacije o timu
 
-**Predmet:** Objektno Orijentisana Analiza i Dizajn  
-**Fakultet:** Elektrotehnički Fakultet, Univerzitet u Sarajevu  
-**Grupa:** Grupa 5 - Tim 1  
-**Repozitorij:** https://github.com/ooad-2025-26/Grupa5-Tim1.git
 
-| Ime i prezime | Indeks |
+| Ime i prezime 
 |---|---|
-| Adna Braković | 19718 |
-| Amina Salkanović | 19773 |
-| Halima Pezo | 19468 |
-| Zuhra Ramčilović | 19613 |
+| Adna Braković
+| Amina Salkanović 
+| Halima Pezo 
+| Zuhra Ramčilović 
 
 ---
 
