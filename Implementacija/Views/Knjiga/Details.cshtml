@@ -102,12 +102,6 @@
         <p class="book-details__meta">
             @Model.DatumIzdavanja.Year · @Model.Izdavac
         </p>
-        @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
-        {
-            <div class="book-details__links">
-                <a asp-action="Edit" asp-route-id="@Model.IdKnjige">Uredi</a>
-            </div>
-        }
     </div>
 </section>
 @if (TempData["Poruka"] != null)

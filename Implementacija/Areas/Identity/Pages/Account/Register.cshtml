@@ -35,7 +35,10 @@
 
         <div class="auth-field">
             <label asp-for="Input.BrojClanskeKartice"></label>
-            <input asp-for="Input.BrojClanskeKartice" class="auth-input" />
+            <input asp-for="Input.BrojClanskeKartice"
+                   class="auth-input"
+                   type="text"
+                   inputmode="numeric" />
             <span asp-validation-for="Input.BrojClanskeKartice" class="text-danger"></span>
         </div>
 

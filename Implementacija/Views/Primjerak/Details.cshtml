@@ -1,30 +1,89 @@
 ﻿@model bibliotecha.Models.Primjerak
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalji primjerka";
 }
 
-<h1>Details</h1>
+<div class="book-form-header book-form-header--compact">
+    <div>
+        <h1>Detalji primjerka</h1>
+        <p>Pregled podataka o fizičkom primjerku knjige.</p>
+    </div>
 
-<div>
-    <h4>Primjerak</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Knjiga)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Knjiga.IdKnjige)
-        </dd>
-    </dl>
+    <a asp-controller="Knjiga"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Nazad na katalog
+    </a>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdPrimjerka">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+
+<div class="book-form-card book-form-card--compact">
+
+    <div>
+
+
+        <div class="form-group mb-4">
+
+            <label class="form-label">
+                Knjiga
+            </label>
+
+            <div class="form-control">
+                @(Model.Knjiga?.Naslov ?? "Nije pronađena knjiga")
+            </div>
+
+        </div>
+
+
+        <div class="form-group mb-4">
+
+            <label class="form-label">
+                Interni ID primjerka
+            </label>
+
+            <div class="form-control">
+                #@Model.IdPrimjerka
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label class="form-label">
+                Status primjerka
+            </label>
+
+            <div>
+                <span class="status-badge status-badge--@Model.Status.ToString().ToLowerInvariant()">
+                    @Model.Status
+                </span>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="book-form-actions">
+
+        @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+        {
+            <a asp-action="Edit"
+               asp-route-id="@Model.IdPrimjerka"
+               class="btn btn-primary">
+                Uredi primjerak
+            </a>
+        }
+
+        <a asp-controller="Knjiga"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Nazad
+        </a>
+
+    </div>
+
 </div>

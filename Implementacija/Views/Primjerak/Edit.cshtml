@@ -4,28 +4,101 @@
     ViewData["Title"] = "Uredi primjerak";
 }
 
-<h1>Uredi primjerak #@Model.IdPrimjerka</h1>
-
-<div class="row">
-    <div class="col-md-6 col-lg-5">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdPrimjerka" />
-            <div class="mb-3">
-                <label asp-for="KnjigaId" class="form-label">Knjiga</label>
-                <select asp-for="KnjigaId" class="form-select" asp-items="ViewBag.KnjigaId"></select>
-                <span asp-validation-for="KnjigaId" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Status" class="form-label">Status</label>
-                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<StatusPrimjerka>()"></select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <button type="submit" class="btn btn-primary">Sačuvaj izmjene</button>
-            <a asp-controller="Knjiga" asp-action="Index" class="btn btn-link">Odustani</a>
-        </form>
+<div class="book-form-header book-form-header--compact">
+    <div>
+        <h1>Uredi primjerak</h1>
+        <p>Izmijenite podatke postojećeg fizičkog primjerka knjige.</p>
     </div>
+
+    <a asp-controller="Knjiga"
+       asp-action="Index"
+       class="btn btn-outline-secondary">
+        Nazad na katalog
+    </a>
 </div>
+
+
+<div class="book-form-card book-form-card--compact">
+
+    <form asp-action="Edit">
+
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger">
+        </div>
+
+
+        <input type="hidden" asp-for="IdPrimjerka" />
+
+
+        <div class="form-group mb-4">
+
+            <label asp-for="KnjigaId"
+                   class="form-label">
+                Knjiga
+            </label>
+
+            <select asp-for="KnjigaId"
+                    class="form-select"
+                    asp-items="ViewBag.KnjigaId">
+                <option value="">
+                    Odaberite knjigu
+                </option>
+            </select>
+
+            <span asp-validation-for="KnjigaId"
+                  class="text-danger">
+            </span>
+
+            <small class="text-muted">
+                Odaberite naslov kojem pripada ovaj primjerak.
+            </small>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label asp-for="Status"
+                   class="form-label">
+                Status primjerka
+            </label>
+
+            <select asp-for="Status"
+                    class="form-select"
+                    asp-items="Html.GetEnumSelectList<StatusPrimjerka>()">
+            </select>
+
+            <span asp-validation-for="Status"
+                  class="text-danger">
+            </span>
+
+            <small class="text-muted">
+                Promijenite trenutno stanje primjerka.
+            </small>
+
+        </div>
+
+
+        <div class="book-form-actions">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Sačuvaj izmjene
+            </button>
+
+            <a asp-controller="Knjiga"
+               asp-action="Index"
+               class="btn btn-outline-secondary">
+                Odustani
+            </a>
+
+        </div>
+
+
+    </form>
+
+</div>
+
 
 @section Scripts {
     @{

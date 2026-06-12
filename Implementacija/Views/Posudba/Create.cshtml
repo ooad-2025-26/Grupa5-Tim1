@@ -11,6 +11,7 @@
     </div>
 </div>
 
+
 <div class="book-form-card">
 
     <form asp-action="Create">
@@ -19,9 +20,12 @@
              class="alert alert-danger">
         </div>
 
+
         <div class="book-form-grid">
 
+
             <div class="form-group">
+
                 <label asp-for="KorisnikId"
                        class="form-label">
                     Korisnik
@@ -30,14 +34,21 @@
                 <select asp-for="KorisnikId"
                         class="form-select"
                         asp-items="ViewBag.KorisnikId">
+                    <option value="">
+                        Odaberite korisnika
+                    </option>
                 </select>
 
                 <span asp-validation-for="KorisnikId"
                       class="text-danger">
                 </span>
+
             </div>
 
+
+
             <div class="form-group">
+
                 <label asp-for="PrimjerakId"
                        class="form-label">
                     Primjerak knjige
@@ -46,31 +57,67 @@
                 <select asp-for="PrimjerakId"
                         class="form-select"
                         asp-items="ViewBag.PrimjerakId">
+
+                    <option value="">
+                        Odaberite primjerak
+                    </option>
+
                 </select>
 
                 <span asp-validation-for="PrimjerakId"
                       class="text-danger">
                 </span>
+
             </div>
+
+
+
+            <div class="form-group">
+
+                <label asp-for="DatumPreuzimanja"
+                       class="form-label">
+                    Datum preuzimanja
+                </label>
+
+
+                <input asp-for="DatumPreuzimanja"
+                       class="form-control"
+                       type="date" />
+
+
+                <span asp-validation-for="DatumPreuzimanja"
+                      class="text-danger">
+                </span>
+
+            </div>
+
 
         </div>
 
+
         <div class="book-form-actions">
 
-            <input type="submit"
-                   value="Evidentiraj posudbu"
-                   class="btn btn-primary" />
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Evidentiraj posudbu
+            </button>
+
 
             <a asp-action="Index"
                class="btn btn-outline-secondary">
                 Odustani
             </a>
 
+
         </div>
+
 
     </form>
 
+
 </div>
+
 
 @section Scripts {
     @{

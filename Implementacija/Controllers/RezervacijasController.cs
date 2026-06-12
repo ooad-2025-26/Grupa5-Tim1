@@ -238,6 +238,77 @@ namespace bibliotecha.Controllers
             return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
         }
 
+        [Authorize(Roles = "Bibliotekar,Administrator")]
+        public async Task<IActionResult> Preuzmi(int id)
+        {
+            var rezervacija = await _context.Rezervacija
+                .Include(r => r.Knjiga)
+                .Include(r => r.Korisnik)
+                .FirstOrDefaultAsync(r => r.IdRezervacije == id);
+
+
+            if (rezervacija == null)
+            {
+                return NotFound();
+            }
+
+
+            if (rezervacija.Status != StatusRezervacije.spremnaZaPreuzimanje)
+            {
+                TempData["Poruka"] = "Rezervacija nije spremna za preuzimanje.";
+                return RedirectToAction(nameof(Index));
+            }
+
+
+            var primjerak = await _context.Primjerak
+                .FirstOrDefaultAsync(p =>
+                    p.KnjigaId == rezervacija.KnjigaId &&
+                    p.Status == StatusPrimjerka.Rezervisan);
+
+
+            if (primjerak == null)
+            {
+                TempData["Poruka"] = "Nema dostupnog primjerka za ovu rezervaciju.";
+                return RedirectToAction(nameof(Index));
+            }
+
+
+            var danas = DateOnly.FromDateTime(DateTime.Today);
+
+
+            var posudba = new Posudba
+            {
+                PrimjerakId = primjerak.IdPrimjerka,
+                KorisnikId = rezervacija.KorisnikId,
+
+                DatumOnlinePosudbe = danas,
+                DatumPreuzimanja = danas,
+
+                RokVracanja = danas.AddDays(14),
+
+                Status = StatusPosudbe.Aktivna,
+
+                BrojProduzenja = 0
+            };
+
+
+            primjerak.Status = StatusPrimjerka.Posudjen;
+
+
+            rezervacija.Status = StatusRezervacije.Ispunjena;
+
+
+            _context.Posudba.Add(posudba);
+
+
+            await _context.SaveChangesAsync();
+
+
+            TempData["Poruka"] = "Rezervacija je pretvorena u posudbu.";
+
+
+            return RedirectToAction(nameof(Index));
+        }
         private bool RezervacijaExists(int id)
         {
             return _context.Rezervacija.Any(e => e.IdRezervacije == id);

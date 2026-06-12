@@ -71,44 +71,38 @@ namespace bibliotecha.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
-            [Required]
+            [Required(ErrorMessage = "Ime je obavezno.")]
             [Display(Name = "Ime")]
             public string Ime { get; set; }
 
-            [Required]
+
+            [Required(ErrorMessage = "Prezime je obavezno.")]
             [Display(Name = "Prezime")]
             public string Prezime { get; set; }
 
-            [Required]
+
+            [Required(ErrorMessage = "Broj članske kartice je obavezan.")]
             [Display(Name = "Broj članske kartice")]
             public int? BrojClanskeKartice { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
+
+            [Required(ErrorMessage = "Email je obavezan.")]
+            [EmailAddress(ErrorMessage = "Email adresa nije ispravna.")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+
+            [Required(ErrorMessage = "Lozinka je obavezna.")]
+            [StringLength(100, MinimumLength = 6, ErrorMessage = "Lozinka mora imati najmanje 6 znakova.")]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "Lozinka")]
             public string Password { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
+
+            [Required(ErrorMessage = "Potvrda lozinke je obavezna.")]
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Potvrdi lozinku")]
+            [Compare("Password", ErrorMessage = "Lozinke se ne podudaraju.")]
             public string ConfirmPassword { get; set; }
         }
 

@@ -668,6 +668,23 @@ a {
     }
 }
 
+.validation-summary-errors ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.validation-summary-errors li {
+    list-style: none;
+    margin: 0;
+}
+
+.validation-summary-errors {
+    color: #dc3545;
+    margin-top: -10px;
+    margin-bottom: 15px;
+}
+
 /* ── Custom Popup ──────────────────────────────────────────── */
 
 .custom-popup {
@@ -1147,4 +1164,66 @@ a {
 
     .password-toggle:focus {
         outline: none;
+    }
+
+/* ── Status posudbi ──────────────────────────────────────────── */
+
+.loan-status {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+}
+
+
+.loan-status--aktivna {
+    background: #cfe8d4;
+}
+
+.loan-status--kasni {
+    background: #f5c6cb;
+}
+
+.loan-status--online {
+    background: #ffe7a3;
+}
+
+.loan-status--zavrsena {
+    background: #cfe2ff;
+}
+
+
+.loan-btn {
+    color: white;
+    border-radius: 0.45rem;
+    padding: 0.35rem 0.9rem;
+}
+
+
+/* preuzmi */
+.loan-btn--preuzmi {
+    background: #c9635e;
+    border: 1px solid #c9635e;
+}
+
+    .loan-btn--preuzmi:hover {
+        background: #ad514d;
+        border-color: #ad514d;
+        color: white;
+    }
+
+
+/* vrati */
+.loan-btn--vrati {
+    background-color: #8b3e39;
+    border-color: #8b3e39;
+    color: white;
+}
+
+    .loan-btn--vrati:hover {
+        background-color: #8b3e39;
+        border-color: #8b3e39;
+        color: white;
     }

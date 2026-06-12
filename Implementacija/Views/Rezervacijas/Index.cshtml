@@ -34,7 +34,7 @@
         Pretraži
     </button>
 
-    @if (!string.IsNullOrWhiteSpace(ViewData["Upit"]?.ToString()))
+    @if (Context.Request.Query.ContainsKey("q"))
     {
         <a asp-action="Index"
            class="btn btn-outline-secondary">
@@ -85,17 +85,38 @@
 
                 <span>
                     <strong>Status:</strong>
-                    @rezervacija.Status
+
+                    @{
+                        var display = rezervacija.Status
+                            .GetType()
+                            .GetMember(rezervacija.Status.ToString())[0]
+                            .GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                            .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+                    }
+
+                    @(display?.Name ?? rezervacija.Status.ToString())
                 </span>
 
             </div>
 
             <div class="management-actions">
+
+                @if (rezervacija.Status == StatusRezervacije.spremnaZaPreuzimanje)
+                {
+                    <a asp-action="Preuzmi"
+                       asp-route-id="@rezervacija.IdRezervacije"
+                       class="btn btn-sm loan-btn loan-btn--preuzmi">
+                        Preuzmi
+                    </a>
+                }
+
+
                 <a asp-action="Details"
                    asp-route-id="@rezervacija.IdRezervacije"
                    class="btn btn-sm btn-outline-secondary">
                     Detalji
                 </a>
+
             </div>
 
         </div>

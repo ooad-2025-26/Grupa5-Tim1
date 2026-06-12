@@ -117,87 +117,130 @@ namespace bibliotecha.Controllers
         }
 
         // POST: Posudba/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> Create(
-    [Bind("PrimjerakId,KorisnikId,RokVracanja")]
+            [Bind("PrimjerakId,KorisnikId,DatumPreuzimanja")]
     Posudba posudba)
         {
             var primjerak = await _context.Primjerak
+                .Include(p => p.Knjiga)
                 .FirstOrDefaultAsync(p => p.IdPrimjerka == posudba.PrimjerakId);
+
 
             if (primjerak == null)
             {
                 ModelState.AddModelError("", "Odabrani primjerak ne postoji.");
             }
-
-            Rezervacija? spremnaRezervacija = null;
-
-            if (primjerak?.Status == StatusPrimjerka.Rezervisan)
+            else
             {
-                spremnaRezervacija = await _context.Rezervacija
+                // provjera statusa primjerka
+                if (primjerak.Status == StatusPrimjerka.Posudjen)
+                {
+                    ModelState.AddModelError("",
+                        "Ovaj primjerak je već posuđen. Nije moguće napraviti novu posudbu.");
+                }
+
+
+                if (primjerak.Status == StatusPrimjerka.Rezervisan)
+                {
+                    var rezervacija = await _context.Rezervacija
+                        .FirstOrDefaultAsync(r =>
+                            r.KnjigaId == primjerak.KnjigaId &&
+                            r.Status == StatusRezervacije.spremnaZaPreuzimanje);
+
+
+                    if (rezervacija != null &&
+                        rezervacija.KorisnikId != posudba.KorisnikId)
+                    {
+                        ModelState.AddModelError("",
+                            "Ovaj primjerak je rezervisan za drugog korisnika.");
+                    }
+                }
+            }
+
+
+            if (ModelState.IsValid)
+            {
+                var danas = posudba.DatumPreuzimanja
+                    ?? DateOnly.FromDateTime(DateTime.Today);
+
+
+                posudba.DatumPreuzimanja = danas;
+                posudba.DatumOnlinePosudbe = null;
+
+                posudba.RokVracanja =
+                    danas.AddDays(_notificationSettings.LoanDurationDays);
+
+                posudba.Status = StatusPosudbe.Aktivna;
+
+                posudba.BrojProduzenja = 0;
+
+
+                primjerak!.Status = StatusPrimjerka.Posudjen;
+
+
+                // ako je bio rezervisan, označi rezervaciju kao završenu
+                var spremnaRezervacija = await _context.Rezervacija
                     .FirstOrDefaultAsync(r =>
                         r.KnjigaId == primjerak.KnjigaId &&
                         r.KorisnikId == posudba.KorisnikId &&
                         r.Status == StatusRezervacije.spremnaZaPreuzimanje);
 
-                if (spremnaRezervacija == null)
-                {
-                    ModelState.AddModelError(
-                        "",
-                        "Rezervisani primjerak može preuzeti samo korisnik kojem je dodijeljen.");
-                }
-            }
-            else if (primjerak?.Status != StatusPrimjerka.Dostupan)
-            {
-                ModelState.AddModelError("", "Primjerak nije dostupan za posudbu.");
-            }
 
-            if (ModelState.IsValid)
-            {
-                var danas = DateOnly.FromDateTime(DateTime.Today);
-
-                posudba.DatumOnlinePosudbe = danas;
-                posudba.DatumPreuzimanja = danas;
-                posudba.RokVracanja =
-                    danas.AddDays(_notificationSettings.LoanDurationDays);
-
-                posudba.Status = StatusPosudbe.Aktivna;
-                posudba.BrojProduzenja = 0;
-
-                primjerak!.Status = StatusPrimjerka.Posudjen;
                 if (spremnaRezervacija != null)
                 {
                     spremnaRezervacija.Status = StatusRezervacije.Ispunjena;
                 }
 
+
                 _context.Posudba.Add(posudba);
 
                 await _context.SaveChangesAsync();
 
-                TempData["Poruka"] = "Nova posudba je uspješno evidentirana.";
+
+                TempData["Poruka"] =
+                    "Nova posudba je uspješno evidentirana.";
 
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.PrimjerakId = new SelectList(
-    _context.Primjerak
-        .Where(p =>
-            p.Status == StatusPrimjerka.Dostupan ||
-            p.Status == StatusPrimjerka.Rezervisan),
-                "IdPrimjerka",
-                "IdPrimjerka",
-                posudba.PrimjerakId);
 
-            ViewBag.KorisnikId = new SelectList(
+
+            // ako validacija padne
+            ViewData["KorisnikId"] = new SelectList(
                 _context.Korisnik
-                    .OrderBy(k => k.Prezime),
+                    .OrderBy(k => k.Prezime)
+                    .Select(k => new
+                    {
+                        k.Id,
+                        Naziv = k.Ime + " " + k.Prezime +
+                                " (Kartica: " + k.BrojClanskeKartice + ")"
+                    }),
                 "Id",
-                "Email",
-                posudba.KorisnikId);
+                "Naziv",
+                posudba.KorisnikId
+            );
+
+
+            ViewData["PrimjerakId"] = new SelectList(
+                _context.Primjerak
+                    .Include(p => p.Knjiga)
+                    .Where(p =>
+                        p.Status == StatusPrimjerka.Dostupan ||
+                        p.IdPrimjerka == posudba.PrimjerakId)
+                    .Select(p => new
+                    {
+                        p.IdPrimjerka,
+                        Naziv = "#" + p.IdPrimjerka +
+                                " - " + p.Knjiga.Naslov
+                    }),
+                "IdPrimjerka",
+                "Naziv",
+                posudba.PrimjerakId
+            );
+
 
             return View(posudba);
         }
@@ -210,34 +253,111 @@ namespace bibliotecha.Controllers
                 return NotFound();
             }
 
-            var posudba = await _context.Posudba.FindAsync(id);
+            var posudba = await _context.Posudba
+                .Include(p => p.Primjerak)
+                    .ThenInclude(pr => pr.Knjiga)
+                .Include(p => p.Korisnik)
+                .FirstOrDefaultAsync(p => p.IdPosudbe == id);
+
             if (posudba == null)
             {
                 return NotFound();
             }
-            ViewData["KorisnikId"] = new SelectList(_context.Korisnik, "IdKorisnika", "IdKorisnika", posudba.KorisnikId);
-            ViewData["PrimjerakId"] = new SelectList(_context.Primjerak, "IdPrimjerka", "IdPrimjerka", posudba.PrimjerakId);
+
+
+            ViewData["KorisnikId"] = new SelectList(
+                _context.Korisnik
+                    .OrderBy(k => k.Prezime)
+                    .Select(k => new
+                    {
+                        k.Id,
+                        Naziv = k.Ime + " " + k.Prezime +
+                                " (Kartica: " + k.BrojClanskeKartice + ")"
+                    }),
+                "Id",
+                "Naziv",
+                posudba.KorisnikId
+            );
+
+
+            ViewData["PrimjerakId"] = new SelectList(
+                _context.Primjerak
+                    .Include(p => p.Knjiga)
+                    .Select(p => new
+                    {
+                        p.IdPrimjerka,
+                        Naziv = "#" + p.IdPrimjerka +
+                                " - " +
+                                p.Knjiga.Naslov
+                    }),
+                "IdPrimjerka",
+                "Naziv",
+                posudba.PrimjerakId
+            );
+
+
             return View(posudba);
         }
 
         // POST: Posudba/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdPosudbe,PrimjerakId,KorisnikId,DatumOnlinePosudbe,DatumPreuzimanja,RokVracanja,Status,BrojProduzenja")] Posudba posudba)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("IdPosudbe,PrimjerakId,KorisnikId,DatumOnlinePosudbe,DatumPreuzimanja,RokVracanja,Status,BrojProduzenja")] Posudba posudba)
         {
             if (id != posudba.IdPosudbe)
             {
                 return NotFound();
             }
 
+
+            // ignoriši navigacione validacije
+            ModelState.Remove(nameof(Posudba.Korisnik));
+            ModelState.Remove(nameof(Posudba.Primjerak));
+
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(posudba);
+                    var postojecaPosudba = await _context.Posudba
+                        .FirstOrDefaultAsync(p => p.IdPosudbe == id);
+
+
+                    if (postojecaPosudba == null)
+                    {
+                        return NotFound();
+                    }
+
+
+                    postojecaPosudba.PrimjerakId = posudba.PrimjerakId;
+                    postojecaPosudba.KorisnikId = posudba.KorisnikId;
+
+                    postojecaPosudba.DatumOnlinePosudbe =
+                        posudba.DatumOnlinePosudbe;
+
+                    postojecaPosudba.DatumPreuzimanja =
+                        posudba.DatumPreuzimanja;
+
+                    postojecaPosudba.RokVracanja =
+                        posudba.RokVracanja;
+
+                    postojecaPosudba.Status =
+                        posudba.Status;
+
+                    postojecaPosudba.BrojProduzenja =
+                        posudba.BrojProduzenja;
+
+
                     await _context.SaveChangesAsync();
+
+
+                    TempData["Poruka"] =
+                        "Posudba je uspješno izmijenjena.";
+
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -245,15 +365,45 @@ namespace bibliotecha.Controllers
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["KorisnikId"] = new SelectList(_context.Korisnik, "IdKorisnika", "IdKorisnika", posudba.KorisnikId);
-            ViewData["PrimjerakId"] = new SelectList(_context.Primjerak, "IdPrimjerka", "IdPrimjerka", posudba.PrimjerakId);
+
+
+            // ako validacija padne, ponovo puni selecte
+
+            ViewData["KorisnikId"] = new SelectList(
+                _context.Korisnik
+                    .OrderBy(k => k.Prezime)
+                    .Select(k => new
+                    {
+                        k.Id,
+                        Naziv = k.Ime + " " + k.Prezime +
+                                " (Kartica: " + k.BrojClanskeKartice + ")"
+                    }),
+                "Id",
+                "Naziv",
+                posudba.KorisnikId
+            );
+
+
+            ViewData["PrimjerakId"] = new SelectList(
+                _context.Primjerak
+                    .Include(p => p.Knjiga)
+                    .Select(p => new
+                    {
+                        p.IdPrimjerka,
+                        Naziv = "#" + p.IdPrimjerka +
+                                " - " +
+                                p.Knjiga.Naslov
+                    }),
+                "IdPrimjerka",
+                "Naziv",
+                posudba.PrimjerakId
+            );
+
+
             return View(posudba);
         }
 
@@ -451,6 +601,19 @@ namespace bibliotecha.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> PrimjerciZaKnjigu(int knjigaId)
+{
+    var primjerci = await _context.Primjerak
+        .Where(p => p.KnjigaId == knjigaId)
+        .Select(p => new
+        {
+            id = p.IdPrimjerka,
+            naziv = "#" + p.IdPrimjerka
+        })
+        .ToListAsync();
+
+    return Json(primjerci);
+}
         private bool PosudbaExists(int id)
         {
             return _context.Posudba.Any(e => e.IdPosudbe == id);
