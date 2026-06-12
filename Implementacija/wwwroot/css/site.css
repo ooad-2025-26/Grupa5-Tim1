@@ -215,7 +215,10 @@ a {
 
 .genre-section {
     border: 1px solid #dfcfc8;
-    background: #f9eee9;
+    background: linear-gradient( rgba(249, 238, 233, 0.78), rgba(249, 238, 233, 0.78) ), url("../images/library-pattern.jpg");
+    background-position: center;
+    background-repeat: repeat;
+    background-size: 520px auto;
     box-shadow: 0 3px 8px rgba(85, 55, 50, 0.18);
     padding: 1rem 1.5rem 1.25rem;
 }
@@ -682,15 +685,24 @@ a {
 }
 
 .navbar-brand {
+    align-items: center;
     color: #f7eee9 !important;
+    display: inline-flex;
+    gap: 0.5rem;
     margin-left: 20px;
     font-size: 1.8rem;
-    line-height: 70px;
+    line-height: 1;
 }
 
     .navbar-brand:hover {
         color: #ffffff !important;
     }
+
+.navbar-brand__logo {
+    height: 34px;
+    object-fit: contain;
+    width: 23px;
+}
 
 .logo-tech {
     color: #ffcfcf;

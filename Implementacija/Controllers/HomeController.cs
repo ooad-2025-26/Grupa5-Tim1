@@ -103,8 +103,8 @@ namespace bibliotecha.Controllers
             return zanr switch
             {
                 Zanr.Klasik => "Klasici",
-                Zanr.Naucne => "Naucne knjige",
-                Zanr.Djecije => "Djecije knjige",
+                Zanr.Naucne => "Naučne knjige",
+                Zanr.Djecije => "Dječije knjige",
                 _ => zanr.ToString()
             };
         }
